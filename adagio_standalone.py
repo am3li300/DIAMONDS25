@@ -103,6 +103,44 @@ def reweight_graph_with_glide(G, nodes_to_expand=None, alpha=0.1, beta=1000, del
     return G
 
 def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_file="schizophrenia-DOID_5419-genes-2025-06-07.tsv"):
+    """
+    Extracts schizophrenia-associated seed proteins present in the input PPI graph.
+
+    This function performs the following steps:
+    1. Reads a TSV file of schizophrenia-associated genes (provided by a database).
+    2. Extracts the unique set of gene symbols associated with schizophrenia.
+    3. Loads a STRING alias mapping file, which maps gene symbols and other aliases to STRING protein identifiers.
+    4. Filters the alias mappings to retain only those that match the schizophrenia-associated gene symbols.
+    5. From the filtered mappings, it selects the unique STRING protein IDs.
+    6. It checks which of these protein IDs are actually present in the provided PPI network `G`.
+    7. Returns the list of STRING protein IDs that both match schizophrenia-associated genes and exist in the graph.
+
+    The function also prints out:
+    - The number of unique schizophrenia gene symbols.
+    - The number of successfully mapped STRING IDs.
+    - A preview of the final list of seed nodes (up to 10 shown).
+
+    Parameters:
+    ----------
+    G : networkx.Graph
+        The protein-protein interaction graph where STRING protein IDs are the node identifiers.
+
+    alias_file : str
+        Path to the STRING alias mapping file (typically "9606.protein.aliases.v12.0.txt").
+        This file should contain mappings between STRING protein IDs and gene symbols/aliases.
+
+    tsv_file : str
+        Path to a TSV file containing disease-associated genes (e.g., schizophrenia).
+        This file should include at least a column named "Gene Symbol".
+
+    Returns:
+    -------
+    nodes_to_expand : List[str]
+        A list of STRING protein IDs that are both associated with the disease of interest and
+        are present in the given PPI network `G`. These serve as seed nodes for downstream analysis
+        (e.g., subnetwork extraction or node prioritization).
+    """
+
     df = pd.read_csv(tsv_file, sep='\t')
     human_genes = set(df["Gene Symbol"].dropna().unique())
     print(f"Number of unique human schizophrenia genes: {len(human_genes)}")
@@ -128,14 +166,18 @@ def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_fi
 # --- MAIN PIPELINE ---
 
 # 1. Load full PPI
-ppi_df = read_ppi_network("9606.protein.physical.links.v12.0.txt")
-ppi_df = ppi_df[ppi_df["combined_score"] >= 600]
+# STRING file: ppi_df = read_ppi_network("9606.protein.physical.links.v12.0.txt"); "9606__protein_links_parsed.txt"
+fileName = input("Enter PPI Network file path/name: ")
+ppi_df = read_ppi_network(fileName)
 G_full = create_ppi_network(ppi_df)
 print(f"Graph: {G_full.number_of_nodes()} nodes, {G_full.number_of_edges()} edges")
 
 # 2. Extract mapped schizophrenia protein IDs as seeds
-# nodes_to_expand = extract_disease_genes(G_full)
-nodes_to_expand = ["9606.ENSP00000403888", "9606.ENSP00000354511", "9606.ENSP00000287842", "9606.ENSP00000332549", "9606.ENSP00000354859", "9606.ENSP00000303252", "9606.ENSP00000341680", "9606.ENSP00000451828", "9606.ENSP00000392423", "9606.ENSP00000380878", "9606.ENSP00000342235", "9606.ENSP00000381382", "9606.ENSP00000489407"]
+aliasFileName = input("Enter alias file path/name for gene symbol mapping: ")
+tsvFileName = input("Enter tsv file path/name for known disease-associated genes: ")
+nodes_to_expand = extract_disease_genes(G_full, aliasFileName, tsvFileName)
+
+#nodes_to_expand = ["9606.ENSP00000403888", "9606.ENSP00000354511", "9606.ENSP00000287842", "9606.ENSP00000332549", "9606.ENSP00000354859", "9606.ENSP00000303252", "9606.ENSP00000341680", "9606.ENSP00000451828", "9606.ENSP00000392423", "9606.ENSP00000380878", "9606.ENSP00000342235", "9606.ENSP00000381382", "9606.ENSP00000489407"]
 # other relevant schizophrenia genes: N/A
 
 """
