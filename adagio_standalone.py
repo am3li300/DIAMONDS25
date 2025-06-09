@@ -173,12 +173,14 @@ G_full = create_ppi_network(ppi_df)
 print(f"Graph: {G_full.number_of_nodes()} nodes, {G_full.number_of_edges()} edges")
 
 # 2. Extract mapped schizophrenia protein IDs as seeds
-aliasFileName = input("Enter alias file path/name for gene symbol mapping: ")
-tsvFileName = input("Enter tsv file path/name for known disease-associated genes: ")
-nodes_to_expand = extract_disease_genes(G_full, aliasFileName, tsvFileName)
+choice = int(input("Enter '0' to use alias and tsv file mapping, '1' to use pre-defined seed nodes: "))
+if not choice:
+    aliasFileName = input("Enter alias file path/name for gene symbol mapping: ")
+    tsvFileName = input("Enter tsv file path/name for known disease-associated genes: ")
+    nodes_to_expand = extract_disease_genes(G_full, aliasFileName, tsvFileName)
 
-#nodes_to_expand = ["9606.ENSP00000403888", "9606.ENSP00000354511", "9606.ENSP00000287842", "9606.ENSP00000332549", "9606.ENSP00000354859", "9606.ENSP00000303252", "9606.ENSP00000341680", "9606.ENSP00000451828", "9606.ENSP00000392423", "9606.ENSP00000380878", "9606.ENSP00000342235", "9606.ENSP00000381382", "9606.ENSP00000489407"]
-# other relevant schizophrenia genes: N/A
+else:
+    nodes_to_expand = input("Enter space-separated seed nodes: ").split()
 
 """
 # 3. Build 1-hop subgraph around seed proteins
