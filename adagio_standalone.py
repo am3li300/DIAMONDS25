@@ -166,7 +166,7 @@ def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_fi
 # --- MAIN PIPELINE ---
 
 # 1. Load full PPI
-# data/9606__protein_links_parsed.txt
+# data/STRING_protein_links_parsed.txt
 fileName = input("Enter PPI Network file path/name: ")
 ppi_df = read_ppi_network(fileName)
 G_full = create_ppi_network(ppi_df)
