@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 from scipy.spatial.distance import pdist, squareform
+from time import time
 
 def cw(A, **kwargs):
     assert isinstance(A, np.ndarray) and (len(A.shape) == 2) and (A.shape[0] == A.shape[1])
@@ -192,6 +193,7 @@ print(f"Subgraph: {G_sub.number_of_nodes()} nodes, {G_sub.number_of_edges()} edg
 """
 
 # 4. Run reweighting and ranking pipeline
+start = time()
 G_reweighted = reweight_graph_with_glide(G_full, nodes_to_expand=nodes_to_expand)
 
 for node in nodes_to_expand:
@@ -202,4 +204,7 @@ for node in nodes_to_expand:
 pr = nx.pagerank(G_reweighted, personalization={node: 1 for node in nodes_to_expand})
 pr_df = pd.Series(pr, name="score").sort_values(ascending=False)
 pr_df.to_csv("pagerank_results.tsv", sep="\t", header=True)
+
+end = time()
 print("Saved PageRank results to pagerank_results.tsv")
+print("'start': {0}\n'end': {1}\n'total time': {2}".format(start, end, end-start))
