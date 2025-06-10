@@ -180,13 +180,13 @@ if not choice:
     nodes_to_expand = extract_disease_genes(G_full, aliasFileName, tsvFileName)
 
 elif choice == 1:
-    nodes_to_expand = [node for node in input("Enter space-separated seed nodes: ").split() if node in G]
+    nodes_to_expand = [node for node in input("Enter space-separated seed nodes: ").split() if node in G_full]
 
 else:
     # ../PPI Networks/Human/Data/20_data_schizophrenia.txt
     fileName = input("Enter seed file path/name: ")
     file = open(fileName, 'r')
-    nodes_to_expand = [node for node in file if node in G]
+    nodes_to_expand = [node for node in file if node in G_full]
     
 
 """
