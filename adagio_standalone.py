@@ -137,8 +137,7 @@ def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_fi
     -------
     nodes_to_expand : List[str]
         A list of STRING protein IDs that are both associated with the disease of interest and
-        are present in the given PPI network `G`. These serve as seed nodes for downstream analysis
-        (e.g., subnetwork extraction or node prioritization).
+        are present in the given PPI network `G`. These serve as seed nodes for the ADAGIO program.
     """
 
     df = pd.read_csv(tsv_file, sep='\t')
