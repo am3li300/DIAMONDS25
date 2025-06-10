@@ -187,7 +187,12 @@ else:
     # ../PPI Networks/Human/Data/20_data_schizophrenia.txt
     fileName = input("Enter seed file path/name: ")
     file = open(fileName, 'r')
-    nodes_to_expand = [node for node in file if node in G_full]
+    nodes_to_expand = []
+    for line in file:
+        node = line[:-1] if line[-1] == '\n' else line
+        if node in G_full:
+            nodes_to_expand.append(node)
+
     print(f"Found {len(nodes_to_expand)} genes in the network.")
     
 
