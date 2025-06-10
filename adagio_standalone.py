@@ -108,16 +108,16 @@ def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_fi
     Extracts schizophrenia-associated seed proteins present in the input PPI graph.
 
     This function performs the following steps:
-    1. Reads a TSV file of schizophrenia-associated genes (provided by a database).
-    2. Extracts the unique set of gene symbols associated with schizophrenia.
+    1. Reads a TSV file of disease-associated genes (provided by a database).
+    2. Extracts the unique set of gene symbols associated with the disease.
     3. Loads a STRING alias mapping file, which maps gene symbols and other aliases to STRING protein identifiers.
-    4. Filters the alias mappings to retain only those that match the schizophrenia-associated gene symbols.
+    4. Filters the alias mappings to retain only those that match the disease-associated gene symbols.
     5. From the filtered mappings, it selects the unique STRING protein IDs.
     6. It checks which of these protein IDs are actually present in the provided PPI network `G`.
-    7. Returns the list of STRING protein IDs that both match schizophrenia-associated genes and exist in the graph.
+    7. Returns the list of STRING protein IDs that both match disease-associated genes and exist in the graph.
 
     The function also prints out:
-    - The number of unique schizophrenia gene symbols.
+    - The number of unique disease gene symbols.
     - The number of successfully mapped STRING IDs.
     - A preview of the final list of seed nodes (up to 10 shown).
 
@@ -127,7 +127,7 @@ def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_fi
         The protein-protein interaction graph where STRING protein IDs are the node identifiers.
 
     alias_file : str
-        Path to the STRING alias mapping file (typically "9606.protein.aliases.v12.0.txt").
+        Path to the STRING alias mapping file (e.g., "9606.protein.aliases.v12.0.txt").
         This file should contain mappings between STRING protein IDs and gene symbols/aliases.
 
     tsv_file : str
@@ -172,7 +172,7 @@ ppi_df = read_ppi_network(fileName)
 G_full = create_ppi_network(ppi_df)
 print(f"Graph: {G_full.number_of_nodes()} nodes, {G_full.number_of_edges()} edges")
 
-# 2. Extract mapped schizophrenia protein IDs as seeds
+# 2. Establish seed nodes
 choice = int(input("Enter '0' to use alias and tsv file mapping, '1' to use pre-defined seed nodes, '2' to use txt file: "))
 if not choice:
     aliasFileName = input("Enter alias file path/name for gene symbol mapping: ")
