@@ -166,21 +166,28 @@ def extract_disease_genes(G, alias_file="9606.protein.aliases.v12.0.txt", tsv_fi
 # --- MAIN PIPELINE ---
 
 # 1. Load full PPI
-# STRING file: ppi_df = read_ppi_network("9606.protein.physical.links.v12.0.txt"); "9606__protein_links_parsed.txt"
+# data/9606__protein_links_parsed.txt
 fileName = input("Enter PPI Network file path/name: ")
 ppi_df = read_ppi_network(fileName)
 G_full = create_ppi_network(ppi_df)
 print(f"Graph: {G_full.number_of_nodes()} nodes, {G_full.number_of_edges()} edges")
 
 # 2. Extract mapped schizophrenia protein IDs as seeds
-choice = int(input("Enter '0' to use alias and tsv file mapping, '1' to use pre-defined seed nodes: "))
+choice = int(input("Enter '0' to use alias and tsv file mapping, '1' to use pre-defined seed nodes, '2' to use txt file: "))
 if not choice:
     aliasFileName = input("Enter alias file path/name for gene symbol mapping: ")
     tsvFileName = input("Enter tsv file path/name for known disease-associated genes: ")
     nodes_to_expand = extract_disease_genes(G_full, aliasFileName, tsvFileName)
 
+elif choice == 1:
+    nodes_to_expand = [node for node in input("Enter space-separated seed nodes: ").split() if node in G_full]
+
 else:
-    nodes_to_expand = input("Enter space-separated seed nodes: ").split()
+    # ../PPI Networks/Human/Data/20_data_schizophrenia.txt
+    fileName = input("Enter seed file path/name: ")
+    file = open(fileName, 'r')
+    nodes_to_expand = [node for node in file if node in G_full]
+    
 
 """
 # 3. Build 1-hop subgraph around seed proteins
