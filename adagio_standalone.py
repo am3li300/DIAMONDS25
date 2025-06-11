@@ -222,3 +222,13 @@ pr_df.to_csv("pagerank_results.tsv", sep="\t", header=True)
 end = time()
 print("Saved PageRank results to pagerank_results.tsv")
 print("'start': {0}\n'end': {1}\n'total time': {2}".format(start, end, end-start))
+
+
+
+
+
+"""
+python3 main.py \
+  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.txt' \
+  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/data/20_data_drug_schizophrenia.txt' 
+"""
