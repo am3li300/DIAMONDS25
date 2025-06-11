@@ -2,15 +2,15 @@ import pandas as pd
 
 def main():
 	# Load alias file
-	alias_df = pd.read_csv("data/9606.protein.aliases.v12.0.txt", sep="\t", header=None, names=["protein_id", "alias", "source"])
+	alias_df = pd.read_csv("../PPI Networks/Human/Data/9606__protein_aliases.tsv", sep="\t", header=None, names=["protein_id", "alias", "source"])
 
 	# Load nodes file
-	file_name = input("Enter tsv file path/name: ")
+	# ../PPI Networks/Human/
+	file_name = input("Enter tsv/txt file path/name: ")
 	seed_ids = []
 	with open(file_name, 'r') as f:
 		for line in f:
 			protein = line.strip().split()[0]
-			print(protein)
 			seed_ids.append(protein)
 
 
