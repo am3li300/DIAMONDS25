@@ -1,0 +1,36 @@
+Main Output:
+
+UBC: Polyubiquitin-C; [Ubiquitin]
+NDUFS2: NADH dehydrogenase [ubiquinone] iron-sulfur protein 2, mitochondrial
+NDUFS4: NADH dehydrogenase [ubiquinone] iron-sulfur protein 4, mitochondrial
+NDUFS3: NADH dehydrogenase [ubiquinone] iron-sulfur protein 3, mitochondrial
+NDUFS8: NADH dehydrogenase [ubiquinone] iron-sulfur protein 8, mitochondrial
+NDUFB6: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 6
+NDUFV1: NADH dehydrogenase [ubiquinone] flavoprotein 1, mitochondrial
+NDUFB1: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 1
+MT-ND4: NADH-ubiquinone oxidoreductase chain 4
+MT-ND5: NADH-ubiquinone oxidoreductase chain 5
+MT-ND3: NADH-ubiquinone oxidoreductase chain 3
+MT-ND4L: NADH-ubiquinone oxidoreductase chain 4L
+NDUFC1: NADH dehydrogenase [ubiquinone] 1 subunit C1, mitochondrial
+NDUFB2: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 2, mitochondrial
+NDUFAB1: Acyl carrier protein, mitochondrial
+
+
+Standalone Output:
+
+UBC: Polyubiquitin-C; [Ubiquitin]
+NDUFA4: Cytochrome c oxidase subunit NDUFA4
+NDUFS3: NADH dehydrogenase [ubiquinone] iron-sulfur protein 3, mitochondrial
+NDUFB6: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 6
+NDUFA8: NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 8
+NDUFS5: NADH dehydrogenase [ubiquinone] iron-sulfur protein 5
+NDUFA11: NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 11
+NDUFB8: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 8, mitochondrial
+NDUFA9: NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 9, mitochondrial
+NDUFC2: NADH dehydrogenase [ubiquinone] 1 subunit C2
+NDUFB4: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 4
+NDUFS7: NADH dehydrogenase [ubiquinone] iron-sulfur protein 7, mitochondrial
+NDUFA13: NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 13
+NDUFB10: NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 10
+NDUFA12: NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 12
