@@ -1,4 +1,4 @@
-Used STRING_protein_links_parsed.txt and 20_data_drug_schizophrenia.txt
+Used STRING_protein_links_parsed.txt and 20_data_alzheimers_disease.txt
 
 9606.ENSP00000459028	1.0332263050504338e-07
 9606.ENSP00000449002	1.0332586266602218e-07
