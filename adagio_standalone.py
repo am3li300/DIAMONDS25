@@ -201,7 +201,7 @@ def cross_validation():
     print(f"Removing {nodes_to_expand[indx]} from seeds.")
     nodes_to_expand.pop(indx)
 
-cross_validation()
+#cross_validation()
 
 # 4. Run reweighting and ranking pipeline
 start = time()
