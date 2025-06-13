@@ -23,7 +23,7 @@ def main():
     f = open(fileName, 'r')
     nodes = [ line[:-1] for line in f ]
     for i in range(25):
-        partition(path, i, nodes)
+        partition(path, i, nodes, disease)
 
     print("All done!")
     
