@@ -2,7 +2,8 @@ import pandas as pd
 
 def main():
 	# Load alias file
-	alias_df = pd.read_csv("../PPI Networks/Human/Data/9606__protein_aliases.tsv", sep="\t", header=None, names=["protein_id", "alias", "source"])
+	alias_file_name = input("Enter STRING alias file path/name: ")
+	alias_df = pd.read_csv(alias_file_name, sep="\t", header=None, names=["protein_id", "alias", "source"])
 
 	# Load nodes file
 	# ../PPI Networks/Human/
