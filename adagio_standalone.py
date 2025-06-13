@@ -195,16 +195,13 @@ else:
 
     print(f"Found {len(nodes_to_expand)} genes in the network.")
     
+def cross_validation():
+    from rand import randint
+    indx = randint(0, len(nodes_to_expand)-1)
+    print(f"Removing {nodes_to_expand[indx]} from seeds.")
+    nodes_to_expand.pop(indx)
 
-"""
-# 3. Build 1-hop subgraph around seed proteins
-neighbor_nodes = set(nodes_to_expand)
-for node in nodes_to_expand:
-    if node in G_full:
-        neighbor_nodes.update(G_full.neighbors(node))
-G_sub = G_full.subgraph(neighbor_nodes).copy()
-print(f"Subgraph: {G_sub.number_of_nodes()} nodes, {G_sub.number_of_edges()} edges")
-"""
+cross_validation()
 
 # 4. Run reweighting and ranking pipeline
 start = time()
