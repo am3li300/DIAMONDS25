@@ -1,12 +1,11 @@
 from random import shuffle
 
-def partition(path, i, nodes):
+def partition(path, i, nodes, disease):
     shuffle(nodes)
     n = len(nodes)
     nonseeds = nodes[:n//2]
     seeds = nodes[n//2:]
     
-    disease = input("Enter disease: ")
     with open(path + "/" + disease + "_new_seeds_" + str(i) + ".txt", 'w') as f1:
         for node in seeds:
             f1.write(node + '\n')
@@ -18,6 +17,7 @@ def partition(path, i, nodes):
     f2.close()
 
 def main():
+    disease = input("Enter disease: ")
     path = input("Enter folder path to save output: ")
     fileName = input("Enter seed file name: ")
     f = open(fileName, 'r')
