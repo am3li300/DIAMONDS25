@@ -7,12 +7,12 @@ def partition(path, i, nodes):
     seeds = nodes[n//2:]
     
     disease = input("Enter disease: ")
-    with open(path + "/" + disease + "_new_seeds_" + i + ".txt", 'w') as f1:
+    with open(path + "/" + disease + "_new_seeds_" + str(i) + ".txt", 'w') as f1:
         for node in seeds:
             f1.write(node + '\n')
     f1.close()
 
-    with open(path + "/" + disease + "_non_seeds_" + i + ".txt", 'w') as f2:
+    with open(path + "/" + disease + "_non_seeds_" + str(i) + ".txt", 'w') as f2:
         for node in nonseeds:
             f2.write(node + '\n')
     f2.close()
