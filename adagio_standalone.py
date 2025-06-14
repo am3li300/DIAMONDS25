@@ -229,3 +229,15 @@ python3 main.py \
   --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.tsv' \
   --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/Data/20_data_drug_schizophrenia.txt' 
 """
+
+"""
+python3 main.py \
+  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.tsv' \
+  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/schizophrenia/schizophrenia_new_seeds_0.txt' --out cross_validation_0.out
+"""
+
+"""
+python3 main.py \
+  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.tsv' \
+  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/rheumatoid_arthritis/RA_new_seeds_0.txt' --out RA_cross_validation_0.out
+"""
