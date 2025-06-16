@@ -8,31 +8,48 @@ import matplotlib.pyplot as plt
 NUM_GENES = 11882 # for STRING network
 
 def count_positives(file, threshold):
-    trueP = 0
+    trueP = falseP = 0
     for line in file:
         if not threshold:
             break
             
         try:
             label = int(line.split()[2])
-            trueP += label
+            if label == 1:
+                trueP += 1
+
+            else:
+                falseP += 1
+
             threshold -= 1
+
         except:
             continue
 
-    return trueP, threshold-trueP
+    return trueP, falseP
 
 def plot_auroc(averages):
     x = [arr[1] for arr in averages]
     y = [arr[0] for arr in averages]
     plt.scatter(x, y)
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Curve")
     plt.show()
 
 def main():
+    """
+    -numPos represents the number of true positives; how many genes in the ranking file trying to be recovered (not seeds)
+    -numNeg represents the number of true negatives; includes both genes that were never disease genes and disease genes that were used as seeds
+    -trueP represents the number of true positives found so far given a threshold; any gene trying to be recovered within the threshold
+    -falseP represents the number of false positives found so far given a threshold; any gene not trying to be recovered within the threshold
+    """
+
     directory = input("Enter the folder path: ")
 
     numDisease = 163 if "schizophrenia" in directory else 95
     numPos = numDisease // 2
+    numNeg = NUM_GENES-numPos
 
     # [0] True Positives, [1] False Positives
     positives = [[0.0]*2 for _ in range(NUM_GENES + 1)]
@@ -46,7 +63,7 @@ def main():
             f.seek(0)
             trueP, falseP = count_positives(f, threshold)
             positives[threshold][0] += trueP*1.0 / numPos
-            positives[threshold][1] += falseP*1.0 / (NUM_GENES - numPos)
+            positives[threshold][1] += falseP*1.0 / numNeg
 
         f.close()   
             
