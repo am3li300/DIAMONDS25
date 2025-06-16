@@ -5,7 +5,7 @@ filePath = "output/validation_rankings/" + ("rheumatoid_arthritis" if disease ==
 k = int(input("Enter k-value: "))
 seen = set()
 for i in range(25):
-    file = open(f"{fileName}{str(i)}.out")
+    file = open(f"{filePath}{str(i)}.out")
     top_k = tuple([line.split()[0] for line in file][-k:])
     if top_k not in seen:
         seen.add(top_k)
