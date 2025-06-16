@@ -3,10 +3,11 @@ filePath = "output/validation_rankings/" + ("rheumatoid_arthritis" if disease ==
             + f"/{disease}_cross_validation_"
 
 k = int(input("Enter k-value: "))
+flag = int(input("Include scores? 1: Yes, 0: No "))
 seen = set()
 for i in range(25):
     file = open(f"{filePath}{str(i)}.out")
-    top_k = tuple([line.split()[0] for line in file][-k:])
+    top_k = tuple([(line.split()[0] if not flag else f"{line.split()[0]} {line.split()[1]}") for line in file][-k:])
     if top_k not in seen:
         seen.add(top_k)
 
