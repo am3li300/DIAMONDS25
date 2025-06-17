@@ -54,9 +54,10 @@ def main():
     """
 
     directory = input("Enter the folder path: ")
+    partition = 3 if "3-fold" in directory else 2
 
     numDisease = 163 if "schizophrenia" in directory else 95
-    numPos = numDisease // 2
+    numPos = numDisease // partition
     numNeg = NUM_GENES-numPos
 
     # [0] True Positives, [1] False Positives
@@ -69,6 +70,8 @@ def main():
         f = open(directory + '/' + file, 'r')
         for threshold in range(1, NUM_GENES + 1):
             f.seek(0)
+            if threshold == 100:
+                print(trueP*1.0/numPos)
             trueP, falseP = count_positives(f, threshold)
             positives[threshold][0] += trueP*1.0 / numPos
             positives[threshold][1] += falseP*1.0 / numNeg
