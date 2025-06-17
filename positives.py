@@ -74,9 +74,6 @@ def main():
             positives[threshold][1] += falseP*1.0 / numNeg
 
         f.close()   
-            
-    print("Top-K value when threshold == 100: ", positives[100][0])
-    print("Top-K value when threshold == 250: ", positives[250][0])
 
     # get the average for each threshold       
     averages = [[0]*2 for _ in range(NUM_GENES + 1)]
@@ -85,6 +82,9 @@ def main():
         averages[i][1] = positives[i][1]/numFiles
 
     plot_auroc(averages)
+
+    print("Average Top-K value when threshold == 100: ", averages[100][0])
+    print("Average Top-K value when threshold == 250: ", averages[250][0])
 
 if __name__ == "__main__":
     main()
