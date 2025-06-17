@@ -4,6 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 # output/validation_output_labels/schizophrenia
+# output/validation_output_labels/rheumatoid_arthritis
 
 NUM_GENES = 11882 # for STRING network
 
@@ -29,12 +30,14 @@ def count_positives(file, threshold):
     return trueP, falseP
 
 def plot_auroc(averages):
-    x = [arr[1] for arr in averages]
-    y = [arr[0] for arr in averages]
-    plt.scatter(x, y)
+    x = [arr[1] for arr in averages if arr != [0,0]]  # skip 0th index
+    y = [arr[0] for arr in averages if arr != [0,0]]
+    plt.plot(x, y, label="Mean ROC curve")
+    plt.plot([0, 1], [0, 1], 'k--', label='Random')
     plt.xlabel("False Positive Rate")
     plt.ylabel("True Positive Rate")
-    plt.title("ROC Curve")
+    plt.title("Average ROC Curve Across Folds")
+    plt.legend()
     plt.show()
 
 def main():
