@@ -2,6 +2,7 @@ import os
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import numpy as np
 
 # output/validation_output_labels/schizophrenia
 # output/validation_output_labels/rheumatoid_arthritis
@@ -40,6 +41,10 @@ def plot_auroc(averages):
     plt.legend()
     plt.show()
 
+    # Trapezoidal Rule to get area under curve
+    auc_score = np.trapz(y, x)
+    print(f"AUC score: {auc_score:.4f}")
+
 def main():
     """
     -numPos represents the number of true positives; how many genes in the ranking file trying to be recovered (not seeds)
@@ -70,6 +75,9 @@ def main():
 
         f.close()   
             
+    print("Top-K value when threshold == 100: ", positives[100][0])
+    print("Top-K value when threshold == 250: ", positives[250][0])
+
     # get the average for each threshold       
     averages = [[0]*2 for _ in range(NUM_GENES + 1)]
     for i in range(1, NUM_GENES + 1):
