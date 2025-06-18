@@ -30,10 +30,8 @@ def count_positives(file, threshold):
 
     return trueP, falseP
 
-def plot_auroc(averages):
-    x = [arr[1] for arr in averages if arr != [0,0]]  # skip 0th index
-    y = [arr[0] for arr in averages if arr != [0,0]]
-    plt.plot(x, y, label="Mean ROC curve")
+def plot_auroc(avgFPR, avgRecall):
+    plt.plot(avgFPR, avgRecall, label="Mean ROC curve")
     plt.plot([0, 1], [0, 1], 'k--', label='Random')
     plt.xlabel("False Positive Rate")
     plt.ylabel("True Positive Rate")
@@ -42,8 +40,22 @@ def plot_auroc(averages):
     plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapz(y, x)
-    print(f"AUC score: {auc_score:.4f}")
+    auc_score = np.trapz(avgRecall, avgFPR)
+    print(f"AUROC score: {auc_score:.4f}")
+
+def plot_auprc(avgRecall, avgPrecision):
+    plt.plot(avgRecall, avgPrecision, label="Mean PRC curve")
+    plt.plot([0, 1], [0, 1], 'k--', label='Random')
+    plt.xlabel("Recall")
+    plt.ylabel("Precision/TPR")
+    plt.title("Average PRC Curve Across Folds")
+    plt.legend()
+    plt.show()
+
+    # Trapezoidal Rule to get area under curve
+    auc_score = np.trapz(avgPrecision, avgRecall)
+    print(f"AUPRC score: {auc_score:.4f}")
+
 
 def main():
     """
@@ -58,10 +70,11 @@ def main():
 
     numDisease = 163 if "schizophrenia" in directory else 95
     numPos = numDisease // partition
-    numNeg = NUM_GENES-numPos
+    numNeg = NUM_GENES - numPos
 
-    # [0] True Positives, [1] False Positives
-    positives = [[0.0]*2 for _ in range(NUM_GENES + 1)]
+    recall = [0]*(NUM_GENES + 1) # same as TPR
+    FPR = [0]*(NUM_GENES + 1)
+    precision = [0]*(NUM_GENES + 1)
 
     numFiles = 0
     for file in os.listdir(directory):
@@ -72,22 +85,30 @@ def main():
             f.seek(0)
             if threshold == 100:
                 print(trueP*1.0/numPos)
+
             trueP, falseP = count_positives(f, threshold)
-            positives[threshold][0] += trueP*1.0 / numPos
-            positives[threshold][1] += falseP*1.0 / numNeg
+            recall[threshold] += trueP*1.0 / numPos
+            FPR[threshold] += falseP*1.0 / numNeg
+            precision[threshold] += trueP*1.0 / threshold
 
         f.close()   
 
     # get the average for each threshold       
-    averages = [[0]*2 for _ in range(NUM_GENES + 1)]
+    avgRecall = [0]*(NUM_GENES + 1)
+    avgFPR = [0]*(NUM_GENES + 1)
+    avgPrecision = [0]*(NUM_GENES + 1)
     for i in range(1, NUM_GENES + 1):
-        averages[i][0] = positives[i][0]/numFiles
-        averages[i][1] = positives[i][1]/numFiles
+        avgRecall[i] = recall[i]/numFiles
+        avgFPR[i] = FPR[i]/numFiles
+        avgPrecision[i] = precision[i]/numFiles
+    
 
-    plot_auroc(averages)
+    plot_auroc(avgFPR, avgRecall)
 
-    print("Average Top-K value when threshold == 100: ", averages[100][0])
-    print("Average Top-K value when threshold == 250: ", averages[250][0])
+    plot_auprc(avgRecall, avgPrecision)
+
+    print("Average Top-K value when threshold == 100: ", avgRecall[100])
+    print("Average Top-K value when threshold == 250: ", avgRecall[250])
 
 if __name__ == "__main__":
     main()
