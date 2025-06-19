@@ -11,12 +11,18 @@ for i in range(int(input("Enter number of files: "))):
         infile_nonseeds = open(f"cross_validation/{disease}/{prefix}{disease if disease == "schizophrenia" else "RA"}_non_seeds_{str(i)}.txt")
         nonseeds = {node[:-1] for node in infile_nonseeds}
 
+        infile_seeds = open(f"cross_validation/{disease}/{prefix}{disease if disease == "schizophrenia" else "RA"}_new_seeds_{str(i)}.txt")
+        seeds = {node[:-1] for node in infile_seeds}
+
         outfile = open(f"output/validation_output_labels/{disease}/{prefix}{"SZ" if disease == "schizophrenia" else "RA"}_validation_labels_{str(i)}.txt", 'w')
         outfile.write("Gene Score Label\n")
 
         for line in infile_ranking:
             line = line.split()
-            node, score = line[0], line[1][:-1]
+            node, score = line[0], line[1]
+            if node in seeds:
+                continue
+                
             outfile.write(f"{node} {score} {'1' if node in nonseeds else '0'}\n")
 
         outfile.close()
