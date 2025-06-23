@@ -39,7 +39,8 @@ def main():
 			# Find the first alias that's in the canonical set
 			mapped_symbol = next((symbol for symbol in aliases if symbol in canonical_symbols), None)
 			if mapped_symbol:
-				file.write(f"{pid} {mapped_symbol}\n")
+				# file.write(f"{pid} {mapped_symbol}\n")
+				file.write(f"{mapped_symbol}\n")
 			else:
 				print(f"No valid symbol found for {pid}")
 
