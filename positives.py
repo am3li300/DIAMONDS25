@@ -4,10 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-# output/validation_output_labels/schizophrenia
-# output/validation_output_labels/rheumatoid_arthritis
-
-NUM_GENES = 11882 # for STRING network
+NUM_GENES = int(input("Enter number of genes in network: ")) # 11882 for STRING network, 10317 for humanbase
 
 def count_positives(file, threshold):
     trueP = falseP = 0
@@ -65,10 +62,14 @@ def main():
     -falseP represents the number of false positives found so far given a threshold; any gene not trying to be recovered within the threshold
     """
 
-    directory = input("Enter the folder path: ")
-    partition = 3 if "3-fold" in directory else 2
+    # cross_validation/validation_output_labels/SZ_humanbase
+    directory = input("Enter the folder path to validation labels: ")
 
-    numDisease = 163 if "schizophrenia" in directory else 95
+    # 2-fold, 3-fold, etc.
+    partition = int(input("Enter number of folds used for validation: "))
+
+    # 163 for schizophrenia, 95 for RA, 153 for humanbase SZ
+    numDisease = int(input("Enter total number of seed genes: "))
     numPos = numDisease // partition
     numNeg = NUM_GENES - numPos
 
