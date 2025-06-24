@@ -1,28 +1,62 @@
-from file_read_backwards import FileReadBackwards
-
-partition_flag = int(input("Enter 1 for 2-fold partitioning, 0 for 3-fold partitioning: "))
-prefix = '' if partition_flag else "3_"
-
-disease = input("rheumatoid_arthritis or schizophrenia: ")
-filePath = "output/validation_rankings/" + disease + f"/{prefix}{"SZ" if disease == "schizophrenia" else "RA"}_cross_validation_"
+"""
+# from file_read_backwards import FileReadBackwards
 
 for i in range(int(input("Enter number of files: "))):
-    with FileReadBackwards(f"{filePath}{str(i)}.out", encoding="utf-8") as infile_ranking:
-        infile_nonseeds = open(f"cross_validation/{disease}/{prefix}{disease if disease == "schizophrenia" else "RA"}_non_seeds_{str(i)}.txt")
-        nonseeds = {node[:-1] for node in infile_nonseeds}
+    # with FileReadBackwards(f"{filePath}{str(i)}.out", encoding="utf-8") as infile_ranking:
 
-        infile_seeds = open(f"cross_validation/{disease}/{prefix}{disease if disease == "schizophrenia" else "RA"}_new_seeds_{str(i)}.txt")
-        seeds = {node[:-1] for node in infile_seeds}
+    # cross_validation/validation_rankings/SZ_humanbase/3_SZ_cross_validation_0.out
+    infile_ranking = open(input(f"Enter file path to gene rankings file {i}: "))
 
-        outfile = open(f"output/validation_output_labels/{disease}/{prefix}{"SZ" if disease == "schizophrenia" else "RA"}_validation_labels_{str(i)}.txt", 'w')
-        outfile.write("Gene Score Label\n")
+    # cross_validation/partitioning/SZ_humanbase/3_schizophrenia_non_seeds_0.txt
+    infile_nonseeds = open(input(f"Enter file path to nonseeds file {i}: "))
+    nonseeds = {node[:-1] for node in infile_nonseeds}
 
-        for line in infile_ranking:
-            line = line.split()
-            node, score = line[0], line[1]
-            if node in seeds:
-                continue
-                
-            outfile.write(f"{node} {score} {'1' if node in nonseeds else '0'}\n")
+    # cross_validation/partitioning/SZ_humanbase/3_schizophrenia_new_seeds_0.txt
+    infile_seeds = open(input(f"Enter file path to seeds file {i}: "))
+    seeds = {node[:-1] for node in infile_seeds}
 
-        outfile.close()
+    # cross_validation/validation_output_labels/SZ_humanbase/SZ_validation_labels_0.txt
+    outfile = open(input(f"Enter file path to output file: "), 'w')
+    outfile.write("Gene Score Label\n")
+
+    for line in infile_ranking:
+        line = line.split()
+        node, score = line[0], line[1]
+        if node in seeds:
+            continue
+            
+        outfile.write(f"{node} {score} {'1' if node in nonseeds else '0'}\n")
+
+    outfile.close()
+
+"""
+
+# User enters base path, prefix, and number of files
+base_path = input("Enter base path (e.g., cross_validation): ").rstrip('/')
+dataset = input("Enter dataset name (e.g., SZ_humanbase): ")
+prefix = input("Enter folds number (e.g., 3): ")
+n_files = int(input("Enter number of files: "))
+
+for i in range(n_files):
+    # Build file paths
+    infile_ranking = open(f"{base_path}/validation_rankings/{dataset}/{prefix}_{dataset.split('_')[0].lower()}_cross_validation_{i}.out")
+    infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_non_seeds_{i}.txt")
+    infile_seeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_new_seeds_{i}.txt")
+    outfile = open(f"{base_path}/validation_output_labels/{dataset}/SZ_validation_labels_{i}.txt", 'w')
+
+    # Prepare seed/nonseed sets
+    nonseeds = {line.strip() for line in infile_nonseeds}
+    seeds = {line.strip() for line in infile_seeds}
+    outfile.write("Gene Score Label\n")
+
+    for line in infile_ranking:
+        node, score = line.split()[:2]
+        if node in seeds:
+            continue
+        outfile.write(f"{node} {score} {'1' if node in nonseeds else '0'}\n")
+
+    # Close files
+    infile_ranking.close()
+    infile_nonseeds.close()
+    infile_seeds.close()
+    outfile.close()
