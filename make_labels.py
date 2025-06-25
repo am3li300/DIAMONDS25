@@ -36,13 +36,15 @@ base_path = input("Enter base path (e.g., cross_validation): ").rstrip('/')
 dataset = input("Enter dataset name (e.g., SZ_humanbase): ")
 prefix = input("Enter folds number (e.g., 3): ")
 n_files = int(input("Enter number of files: "))
+disease = input("Enter disease name (e.g. schizophrenia or SZ, must match seed file names): ")
 
 for i in range(n_files):
     # Build file paths
-    infile_ranking = open(f"{base_path}/validation_rankings/{dataset}/{prefix}_{dataset.split('_')[0].lower()}_cross_validation_{i}.out")
-    infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_non_seeds_{i}.txt")
-    infile_seeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_new_seeds_{i}.txt")
-    outfile = open(f"{base_path}/validation_output_labels/{dataset}/SZ_validation_labels_{i}.txt", 'w')
+    # infile_ranking = open(f"{base_path}/validation_rankings/{dataset}/{prefix}_{dataset.split('_')[0].lower()}_cross_validation_{i}.out")
+    infile_ranking = open(f"{base_path}/validation_rankings/{dataset}/{dataset}_out_{i}.txt")
+    infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_{disease}_non_seeds_{i}.txt")
+    infile_seeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_{disease}_new_seeds_{i}.txt")
+    outfile = open(f"{base_path}/validation_output_labels/{dataset}/{disease}_validation_labels_{i}.txt", 'w')
 
     # Prepare seed/nonseed sets
     nonseeds = {line.strip() for line in infile_nonseeds}
