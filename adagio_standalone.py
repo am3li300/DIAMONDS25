@@ -226,8 +226,8 @@ print("'start': {0}\n'end': {1}\n'total time': {2}".format(start, end, end-start
 # STRING network
 """
 python3 main.py \
-  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.tsv' \
-  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/Data/20_data_drug_schizophrenia.txt' 
+  --network '../Data/STRING_protein_links_parsed.tsv' \
+  --genelist '../Data/20_data_drug_schizophrenia.txt' 
 """
 
 # humanbase network

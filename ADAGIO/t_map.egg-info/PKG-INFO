@@ -1,0 +1,33 @@
+Metadata-Version: 2.4
+Name: t_map
+Version: 0.1.0
+Summary: ADAGIO Ranking of Genes
+Author: Mert Erden
+Author-email: mert.erden@tufts.edu
+License: MIT license
+Keywords: t_map
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.8
+License-File: LICENSE
+License-File: AUTHORS.rst
+Requires-Dist: networkx
+Requires-Dist: sklearn
+Requires-Dist: pandas
+Requires-Dist: dill
+Requires-Dist: numpy
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
