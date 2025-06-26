@@ -253,7 +253,7 @@ python3 main.py \
 """
 python3 main.py \
   --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/data/networks/entrez_filtered_brain_0.3.tsv' \
-  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/partitioning/SZ_humanbase/3_schizophrenia_new_seeds_0.txt' --out SZ_cross_validation_0.out
+  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/partitioning/SZ_humanbase_brain/3_schizophrenia_new_seeds_0.txt' --out '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/validation_rankings/SZ_humanbase_brain/SZ_cross_validation_0.out'
 """
 
 """

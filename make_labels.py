@@ -43,8 +43,8 @@ for i in range(n_files):
     # Build file paths
     if reverse_flag:
         with FileReadBackwards(f"{base_path}/validation_rankings/{dataset}/{prefix}_SZ_cross_validation_{i}.out") as infile_ranking:
-            infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/schizophrenia_non_seeds_{i}.txt")
-            infile_seeds = open(f"{base_path}/partitioning/{dataset}/schizophrenia_new_seeds_{i}.txt")
+            infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_non_seeds_{i}.txt")
+            infile_seeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_new_seeds_{i}.txt")
             outfile = open(f"{base_path}/validation_output_labels/{dataset}/SZ_validation_labels_{i}.txt", 'w')
 
             # Prepare seed/nonseed sets
@@ -66,8 +66,8 @@ for i in range(n_files):
 
     else:
         infile_ranking = open(f"{base_path}/validation_rankings/{dataset}/{prefix}_SZ_cross_validation_{i}.out")
-        infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/schizophrenia_non_seeds_{i}.txt")
-        infile_seeds = open(f"{base_path}/partitioning/{dataset}/schizophrenia_new_seeds_{i}.txt")
+        infile_nonseeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_non_seeds_{i}.txt")
+        infile_seeds = open(f"{base_path}/partitioning/{dataset}/{prefix}_schizophrenia_new_seeds_{i}.txt")
         outfile = open(f"{base_path}/validation_output_labels/{dataset}/SZ_validation_labels_{i}.txt", 'w')
 
         # Prepare seed/nonseed sets

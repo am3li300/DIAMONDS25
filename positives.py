@@ -62,13 +62,13 @@ def main():
     -falseP represents the number of false positives found so far given a threshold; any gene not trying to be recovered within the threshold
     """
 
-    # cross_validation/validation_output_labels/SZ_humanbase
+    # cross_validation/validation_output_labels/SZ_humanbase_brain
     directory = input("Enter the folder path to validation labels: ")
 
     # 2-fold, 3-fold, etc.
     partition = int(input("Enter number of folds used for validation: "))
 
-    # 163 for schizophrenia, 95 for RA, 153 for humanbase SZ
+    # 163 for schizophrenia, 95 for RA, 114 for humanbase SZ
     numDisease = int(input("Enter total number of seed genes: "))
     numPos = numDisease // partition
     numNeg = NUM_GENES - numPos

@@ -1,7 +1,11 @@
 import pandas as pd
 
 # network assumed to be tsv, gene gene score
+
+# data/networks/entrez_filtered_brain_0.3.tsv
 net_path = input("Enter network file path: ")
+
+# 
 seed_path = input("Enter seed file path: ")
 out_path = input("Enter the output path/file name: ")
 
