@@ -1,0 +1,4 @@
+name: tmap
+channels:
+  - defaults
+prefix: /usr/local/Caskroom/miniconda/base/envs/tmap
