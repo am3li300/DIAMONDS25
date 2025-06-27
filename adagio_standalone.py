@@ -221,6 +221,14 @@ print("Saved PageRank results to pagerank_results.tsv")
 print("'start': {0}\n'end': {1}\n'total time': {2}".format(start, end, end-start))
 
 
+"""
+glide-compute \
+  --network path/to/ppi.tsv \
+  --output  glide.pkl            # or .tsv if asking for neighbours
+  --get-glide-neighbors \
+  --glide-neighbors-k 50         # top-50 per node (change as needed)
+  --neighbors-return-format dataframe
+"""
 
 
 # STRING network
