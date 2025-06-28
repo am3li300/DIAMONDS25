@@ -29,9 +29,17 @@ rankings.close()
 outfile.close()
 """
 
+
+f = open(input("Enter path to seeds: "))
+for line in f:
+    seed = line.strip()
+    print(seed + "\t" + str(graph.degree[seed]))
+
+"""
 degrees = [degree for node, degree in graph.degree() if degree <= 400]
 print(len([degree for node, degree in graph.degree() if degree > 1000]))
 plt.hist(degrees)
 plt.xlabel("Degree")
 plt.ylabel("Frequency")
 plt.show()
+"""

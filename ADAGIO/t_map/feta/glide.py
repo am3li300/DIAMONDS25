@@ -3,6 +3,7 @@ import networkx as nx
 import numpy as np
 from contextlib import contextmanager
 from copy import deepcopy
+from math import floor
 
 from t_map.gene.gene import Gene
 from typing import Any, List, Set, Tuple, Union, Optional
@@ -85,6 +86,21 @@ class ADAGIO(PreComputeFeta):
 
     def reset_graph(self) -> None:
         self.graph = deepcopy(self._original_graph)
+
+    """
+    new function
+    """
+    def construct_k_mat(self) -> dict[str, int]:
+        nodes = list(self.graph.nodes)
+        total_sum = sum(self.graph.degree[node] for node in nodes)
+        avg_degree = total_sum//len(nodes)
+        max_edges_to_add = {}
+        clustering_coefficients = nx.clustering(self.graph)
+        for node in nodes:
+            # adaptive k function
+            max_edges_to_add[node] = floor(avg_degree*(1-clustering_coefficients[node]))
+
+        return max_edges_to_add
 
     def add_new_edges(self, global_new_edges_percentage: float,
                       in_place: bool = False) -> Optional[nx.Graph]:
