@@ -103,8 +103,9 @@ class ADAGIO(PreComputeFeta):
         max_edges_to_add = defaultdict(int)
         clustering_coefficients = nx.clustering(self.graph)
         for node in disease_genes:
+            name = node.name
             # adaptive k function
-            max_edges_to_add[node] = max(1, floor(avg_degree*(1-clustering_coefficients[node])))
+            max_edges_to_add[name] = max(1, floor(avg_degree*(1-clustering_coefficients[name])))
 
         return max_edges_to_add
 
@@ -113,9 +114,9 @@ class ADAGIO(PreComputeFeta):
     """
     def get_k_value_for_node(self, node):
         nodes = list(self.graph.nodes)
-        total_sum = sum(self.graph.degree[node] for node in nodes)
+        total_sum = sum(self.graph.degree[gene] for gene in nodes)
         avg_degree = total_sum//len(nodes)
-        return max(1, floor(avg_degree*(1-nx.clustering(self.graph, node))))
+        return max(1, floor(avg_degree*(1-nx.clustering(self.graph, node.name))))
 
     def add_new_edges(self, global_new_edges_percentage: float,
                       in_place: bool = False) -> Optional[nx.Graph]:
@@ -282,7 +283,7 @@ class ADAGIO(PreComputeFeta):
                 for (i, j) in to_remove_pairs:
                     graph.add_edge(
                         self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
-
+        print(len(graph.edges))
         if hasattr(self, '__dada'):
             return self.__dada.prioritize(disease_genes, graph)
         else:
