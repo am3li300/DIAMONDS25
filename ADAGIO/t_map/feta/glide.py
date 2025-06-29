@@ -4,6 +4,7 @@ import numpy as np
 from contextlib import contextmanager
 from copy import deepcopy
 from math import floor
+from collections import defaultdict
 
 from t_map.gene.gene import Gene
 from typing import Any, List, Set, Tuple, Union, Optional
@@ -74,8 +75,13 @@ class ADAGIO(PreComputeFeta):
         # self._get_sorted_similarity_indexes(descending=True)
         self.reweight_graph()
 
-    def set_add_edges_amount(self, amount: int) -> None:
-        self.to_add = amount
+        self.k_mat = defaultdict(int)
+
+    """
+    change to handle dictionary argument
+    """
+    def set_add_edges_amount(self, amount: int | dict[str, int]) -> None:
+        self.k_mat = amount if isinstance(amount) == dict else defaultdict(lambda: amount)
 
     def set_remove_edges_percent(self, percentage: float) -> None:
         self.to_remove = percentage
@@ -88,19 +94,28 @@ class ADAGIO(PreComputeFeta):
         self.graph = deepcopy(self._original_graph)
 
     """
-    new function
+    new function - gets 
     """
-    def construct_k_mat(self) -> dict[str, int]:
+    def construct_k_mat(self, disease_genes: List[Gene]) -> dict[str, int]:
         nodes = list(self.graph.nodes)
         total_sum = sum(self.graph.degree[node] for node in nodes)
         avg_degree = total_sum//len(nodes)
-        max_edges_to_add = {}
+        max_edges_to_add = defaultdict(int)
         clustering_coefficients = nx.clustering(self.graph)
-        for node in nodes:
+        for node in disease_genes:
             # adaptive k function
-            max_edges_to_add[node] = floor(avg_degree*(1-clustering_coefficients[node]))
+            max_edges_to_add[node] = max(1, floor(avg_degree*(1-clustering_coefficients[node])))
 
         return max_edges_to_add
+
+    """
+    new function
+    """
+    def get_k_value_for_node(self, node):
+        nodes = list(self.graph.nodes)
+        total_sum = sum(self.graph.degree[node] for node in nodes)
+        avg_degree = total_sum//len(nodes)
+        return max(1, floor(avg_degree*(1-nx.clustering(self.graph, node))))
 
     def add_new_edges(self, global_new_edges_percentage: float,
                       in_place: bool = False) -> Optional[nx.Graph]:
@@ -157,6 +172,9 @@ class ADAGIO(PreComputeFeta):
         else:
             return graph
 
+    """
+    change new_edges_count parameter
+    """
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
         indexes = self._get_sorted_similarity_indexes()
         node_idx = self.gmap[node]
@@ -229,6 +247,9 @@ class ADAGIO(PreComputeFeta):
             graph[u][v]['weight'] = gmat[gmap[u]][gmap[v]]
         return graph
 
+    """
+    change self.to_add to call k function
+    """
     def prioritize(self, disease_genes: List[Gene],
                    graph: Union[nx.Graph, None],
                    tissue_file: Optional[str] = None,
@@ -239,13 +260,19 @@ class ADAGIO(PreComputeFeta):
             graph = reweight_graph_by_tissue(graph, tissue_file)
 
         graph = deepcopy(self.graph)
-        if hasattr(self, "to_add"):
+        if hasattr(self, "k_mat"):
+            self.k_mat = self.construct_k_mat(disease_genes)
             for disease_gene in disease_genes:
-                to_add_pairs = self.add_edges_around_node(
-                    disease_gene.name, self.to_add, variant)
-                for (i, j) in to_add_pairs:
-                    graph.add_edge(
-                        self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
+                k_i = self.k_mat.get(disease_gene.name, 0)
+                if k_i > 0:
+                    pairs = self.add_edges_around_node(disease_gene.name,
+                                                    k_i,
+                                                    variant)
+                    for (i, j) in pairs:
+                        graph.add_edge(self.rgmap[i],
+                                    self.rgmap[j],
+                                    weight=self.gmat[i][j])
+
         if hasattr(self, "to_remove"):
             mst = tree.maximum_spanning_edges(
                 graph, algorithm="prim", data=False)
