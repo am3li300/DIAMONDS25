@@ -122,7 +122,7 @@ class ADAGIO(PreComputeFeta):
         self.graph = deepcopy(self._original_graph)
 
     """
-    new function - gets 
+    not being used  ****USELESS***** 
     """
     def construct_k_mat(self, graph, disease_genes: List[Gene]) -> dict[str, int]:
         nodes = list(graph.nodes)
