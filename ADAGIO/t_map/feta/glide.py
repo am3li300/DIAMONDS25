@@ -185,6 +185,9 @@ class ADAGIO(PreComputeFeta):
         max_edges = self.graph.edges(node)
         for i, j in indexes:
             if node_idx == i or node_idx == j:
+                """
+                add additional condition to check dscript score
+                """
                 if (self.rgmap[i], self.rgmap[j]) not in graph_edges:
                     pairs_to_add.append((i, j))
                     add_cnt += 1
