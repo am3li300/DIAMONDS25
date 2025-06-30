@@ -16,6 +16,11 @@ from t_map.garbanzo.transforms.tissue_reweight import reweight_graph_by_tissue
 from gfunc.command import glide_mat
 from networkx.algorithms import tree
 
+import sys
+import os
+TARGET_PATH = os.path.abspath('../../../D-SCRIPT/dscript')
+sys.path.insert(0, TARGET_PATH)
+import __main__
 
 class bcolors:
     HEADER = '\033[95m'
@@ -76,9 +81,10 @@ class ADAGIO(PreComputeFeta):
         self.reweight_graph()
 
         self.k_mat = defaultdict(int)
-        self.
+        self.fasta_dict = self.setup_fasta_dict()
 
     def setup_fasta_dict(self) -> dict[str, str]:
+        # data/UP000005640_9606.fasta
         file = open(input("Enter file path for gene sequences: "))
         mapping = defaultdict(str)
         gene = ""
@@ -118,27 +124,27 @@ class ADAGIO(PreComputeFeta):
     """
     new function - gets 
     """
-    def construct_k_mat(self, disease_genes: List[Gene]) -> dict[str, int]:
-        nodes = list(self.graph.nodes)
-        total_sum = sum(self.graph.degree[node] for node in nodes)
+    def construct_k_mat(self, graph, disease_genes: List[Gene]) -> dict[str, int]:
+        nodes = list(graph.nodes)
+        total_sum = sum(graph.degree[node] for node in nodes)
         avg_degree = total_sum//len(nodes)
         max_edges_to_add = defaultdict(int)
-        clustering_coefficients = nx.clustering(self.graph)
+        clustering_coefficients = nx.clustering(graph)
         for node in disease_genes:
             name = node.name
             # adaptive k function
-            max_edges_to_add[name] = max(1, floor(avg_degree*(1-clustering_coefficients[name])))
+            max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
 
         return max_edges_to_add
 
     """
     new function
     """
-    def get_k_value_for_node(self, node):
-        nodes = list(self.graph.nodes)
-        total_sum = sum(self.graph.degree[gene] for gene in nodes)
+    def get_k_value_for_node(self, graph, node):
+        nodes = list(graph.nodes)
+        total_sum = sum(graph.degree[gene] for gene in nodes)
         avg_degree = total_sum//len(nodes)
-        return max(1, floor(avg_degree*(1-nx.clustering(self.graph, node.name))))
+        return floor(avg_degree*(1-nx.clustering(graph, node.name)))
 
     def add_new_edges(self, global_new_edges_percentage: float,
                       in_place: bool = False) -> Optional[nx.Graph]:
@@ -196,7 +202,7 @@ class ADAGIO(PreComputeFeta):
             return graph
 
     """
-    change new_edges_count parameter
+    send dscript scores as a parameter
     """
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
         indexes = self._get_sorted_similarity_indexes()
@@ -287,9 +293,8 @@ class ADAGIO(PreComputeFeta):
 
         graph = deepcopy(self.graph)
         if hasattr(self, "k_mat"):
-            self.k_mat = self.construct_k_mat(disease_genes)
             for disease_gene in disease_genes:
-                k_i = self.k_mat.get(disease_gene.name, 0)
+                k_i = self.get_k_value_for_node(graph, disease_gene)
                 if k_i > 0:
                     pairs = self.add_edges_around_node(disease_gene.name,
                                                     k_i,
