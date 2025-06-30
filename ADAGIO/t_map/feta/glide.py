@@ -76,6 +76,28 @@ class ADAGIO(PreComputeFeta):
         self.reweight_graph()
 
         self.k_mat = defaultdict(int)
+        self.
+
+    def setup_fasta_dict(self) -> dict[str, str]:
+        file = open(input("Enter file path for gene sequences: "))
+        mapping = defaultdict(str)
+        gene = ""
+        sequence = []
+        for line in file:
+            if line[0] == '>':
+                if gene:
+                    mapping[gene] = "".join(sequence)
+                    sequence = []
+
+                x = "".join(line.split(' | ')[2])
+                humanIndx = x.index("_HUMAN")
+                gene = x[:humanIndx]
+
+            else:
+                sequence.append(line.strip())
+
+        mapping[gene] = "".join(sequence)
+        return mapping
 
     """
     change to handle dictionary argument
