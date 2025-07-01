@@ -18,9 +18,10 @@ from networkx.algorithms import tree
 
 import sys
 import os
-TARGET_PATH = os.path.abspath('../../../D-SCRIPT/dscript')
-sys.path.insert(0, TARGET_PATH)
-import __main__
+script_dir = os.path.abspath(os.path.join(__file__, '../../../D-SCRIPT/dscript/commands'))
+sys.path.append(script_dir)
+
+from predict import dscript_predict
 
 class bcolors:
     HEADER = '\033[95m'
