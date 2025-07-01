@@ -18,7 +18,7 @@ from networkx.algorithms import tree
 
 import sys
 import os
-script_dir = os.path.abspath(os.path.join(__file__, '../../../D-SCRIPT/dscript/commands'))
+script_dir = os.path.abspath(os.path.join(__file__, '../../DScript'))
 sys.path.append(script_dir)
 
 from predict import dscript_predict
