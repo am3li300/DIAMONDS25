@@ -98,7 +98,7 @@ class ADAGIO(PreComputeFeta):
                     mapping[gene] = "".join(sequence)
                     sequence = []
 
-                x = "".join(line.split(' | ')[2])
+                x = "".join(line.split('|')[2])
                 humanIndx = x.index("_HUMAN")
                 gene = x[:humanIndx]
 
