@@ -88,7 +88,7 @@ class ADAGIO(PreComputeFeta):
 
     def setup_fasta_dict(self) -> dict[str, str]:
         # data/UP000005640_9606.fasta
-        file = open("../../../data/UP000005640_9606.fasta")#input("Enter file path for gene sequences: "))
+        file = open("../data/UP000005640_9606.fasta") #input("Enter file path for gene sequences: "))
         mapping = defaultdict(str)
         gene = ""
         sequence = []
