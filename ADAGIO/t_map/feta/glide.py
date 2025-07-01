@@ -211,7 +211,7 @@ class ADAGIO(PreComputeFeta):
         indexes = self._get_sorted_similarity_indexes()
         self.candidate_pairs = pd.DataFrame(indexes, columns=["Gene1", "Gene2"])
         node_idx = self.gmap[node]
-        graph_edges = self.graph.edges()
+        graph_edges = set(self.graph.edges())
         add_cnt = 0
         pairs_to_add = []
         max_edges = self.graph.edges(node)
