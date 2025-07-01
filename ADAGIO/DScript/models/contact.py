@@ -25,7 +25,7 @@ class FullyConnected(nn.Module):
 
         self.D = embed_dim
         self.H = hidden_dim
-        self.conv = nn.Conv2d(2 * self.D, self.H, 1)
+        self.conv = nn.Conv2d(self.D, self.H, 1)
         self.batchnorm = nn.BatchNorm2d(self.H)
         """
         self.proj = nn.Linear(121, 100)

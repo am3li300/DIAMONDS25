@@ -140,7 +140,9 @@ class ModelInteraction(nn.Module):
         if self.embedding is None:
             return x
         else:
-            return self.embedding(x)
+            out = self.embedding(x)
+            print(">>>>> EMBED SHAPE:", out.shape)
+            return out
 
     def cpred(
         self,
