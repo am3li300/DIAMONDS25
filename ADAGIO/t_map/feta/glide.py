@@ -16,12 +16,12 @@ from t_map.garbanzo.transforms.tissue_reweight import reweight_graph_by_tissue
 from gfunc.command import glide_mat
 from networkx.algorithms import tree
 
-import sys
-import os
-script_dir = os.path.abspath(os.path.join(__file__, '../../DScript'))
-sys.path.append(script_dir)
+# import sys
+# import os
+# script_dir = os.path.abspath(os.path.join(__file__, '../../DScript'))
+# sys.path.append(script_dir)
 
-from predict import dscript_predict
+from DScript.predict import dscript_predict
 
 class bcolors:
     HEADER = '\033[95m'
