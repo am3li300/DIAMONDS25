@@ -11,10 +11,8 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         print(len(graph.graph.edges))
         model = ADAGIO()
         model.setup(graph.graph)
-        
+        model.set_add_edges_amount(20)
         predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
-        print(len(graph.graph.edges))
-        return
         with open(out_path, "w") as f:
                 for gene, score in predictions:
                         f.write(f"{gene.name}\t{score}\n")
