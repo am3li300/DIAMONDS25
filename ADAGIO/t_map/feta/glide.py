@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from math import floor
 from collections import defaultdict
+import pandas as pd
 
 from t_map.gene.gene import Gene
 from typing import Any, List, Set, Tuple, Union, Optional
@@ -81,8 +82,9 @@ class ADAGIO(PreComputeFeta):
         # self._get_sorted_similarity_indexes(descending=True)
         self.reweight_graph()
 
+        self.candidate_pairs = pd.DataFrame()
         self.k_mat = defaultdict(int)
-        self.fasta_dict = self.setup_fasta_dict()
+        self.seq_dict = self.setup_fasta_dict()
 
     def setup_fasta_dict(self) -> dict[str, str]:
         # data/UP000005640_9606.fasta
@@ -207,6 +209,7 @@ class ADAGIO(PreComputeFeta):
     """
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
         indexes = self._get_sorted_similarity_indexes()
+        self.candidate_pairs = pd.DataFrame(indexes, columns=["Gene1", "Gene2"])
         node_idx = self.gmap[node]
         graph_edges = self.graph.edges()
         add_cnt = 0
@@ -293,6 +296,10 @@ class ADAGIO(PreComputeFeta):
             graph = reweight_graph_by_tissue(graph, tissue_file)
 
         graph = deepcopy(self.graph)
+        """
+        testing dscript
+        """
+        dscript_predict(self.candidate_pairs, "../../../DScript/model.safetensors", "a.out", self.seq_dict, 0.5)
         if hasattr(self, "k_mat"):
             for disease_gene in disease_genes:
                 k_i = self.get_k_value_for_node(graph, disease_gene)

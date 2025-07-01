@@ -69,7 +69,7 @@ def add_args(parser):
     return parser
 
 
-def dscript_predict(pairs_df, modelPath, outPath, seqDict, threshold, store_cmaps, foldseek_fasta=None, embPath=None):
+def dscript_predict(pairs_df, modelPath, outPath, seqDict, threshold, store_cmaps=None, foldseek_fasta=None, embPath=None):
     """             
     Run new prediction from arguments.
 
