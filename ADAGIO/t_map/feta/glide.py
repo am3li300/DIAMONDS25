@@ -112,7 +112,7 @@ class ADAGIO(PreComputeFeta):
     change to handle dictionary argument
     """
     def set_add_edges_amount(self, amount: int | dict[str, int]) -> None:
-        self.k_mat = amount if isinstance(amount) == dict else defaultdict(lambda: amount)
+        self.k_mat = amount if isinstance(amount, dict) else defaultdict(lambda: amount)
 
     def set_remove_edges_percent(self, percentage: float) -> None:
         self.to_remove = percentage
