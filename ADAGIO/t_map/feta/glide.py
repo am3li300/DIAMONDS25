@@ -299,7 +299,7 @@ class ADAGIO(PreComputeFeta):
         """
         testing dscript
         """
-        dscript_predict(self.candidate_pairs, "samsl/topsy_turvy_human_v1", "a.out", self.seq_dict, 0.5)
+        dscript_predict(self.candidate_pairs, "../../DScript", "a.out", self.seq_dict, 0.5)
         if hasattr(self, "k_mat"):
             for disease_gene in disease_genes:
                 k_i = self.get_k_value_for_node(graph, disease_gene)

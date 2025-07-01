@@ -293,6 +293,25 @@ class DSCRIPTModel(ModelInteraction, PyTorchModelHubMixin):
         lambda_init=0,
         gamma_init=0,
     ):
+
+        # Save config as dict so it can be serialized
+        self.config = {
+            "emb_nin": emb_nin,
+            "emb_nout": emb_nout,
+            "emb_dropout": emb_dropout,
+            "con_embed_dim": con_embed_dim,
+            "con_hidden_dim": con_hidden_dim,
+            "con_width": con_width,
+            "use_cuda": use_cuda,
+            "do_w": do_w,
+            "do_sigmoid": do_sigmoid,
+            "do_pool": do_pool,
+            "pool_size": pool_size,
+            "theta_init": theta_init,
+            "lambda_init": lambda_init,
+            "gamma_init": gamma_init,
+        }
+
         embedding = FullyConnectedEmbed(
             emb_nin, emb_nout, emb_dropout, emb_activation
         )
@@ -309,3 +328,29 @@ class DSCRIPTModel(ModelInteraction, PyTorchModelHubMixin):
             lambda_init=lambda_init,
             gamma_init=gamma_init,
         )
+
+    @classmethod
+    def from_pretrained(cls, model_dir, use_cuda=False):
+        from pathlib import Path
+        import json
+        import torch
+
+        config_path = Path(model_dir) / "config.json"
+        model_path = Path(model_dir) / model.safetensors
+
+        with open(config_path) as f:
+            config = json.load(f)
+
+        config["use_cuda"] = use_cuda  # override if needed
+
+        model = cls(**config)
+        state_dict = torch.load(model_path, map_location="cpu")
+        model.load_state_dict(state_dict)
+        return model
+
+    def save_pretrained(self, path):
+        import os, json
+        os.makedirs(path, exist_ok=True)
+        torch.save(self.state_dict(), os.path.join(path, "pytorch_model.bin"))
+        with open(os.path.join(path, "config.json"), "w") as f:
+            json.dump(self.config, f)
