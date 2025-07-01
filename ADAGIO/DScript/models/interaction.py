@@ -336,7 +336,7 @@ class DSCRIPTModel(ModelInteraction, PyTorchModelHubMixin):
         import torch
 
         config_path = Path(model_dir) / "config.json"
-        model_path = Path(model_dir) / model.safetensors
+        model_path = Path(model_dir) / "model.safetensors"
 
         with open(config_path) as f:
             config = json.load(f)
@@ -351,6 +351,6 @@ class DSCRIPTModel(ModelInteraction, PyTorchModelHubMixin):
     def save_pretrained(self, path):
         import os, json
         os.makedirs(path, exist_ok=True)
-        torch.save(self.state_dict(), os.path.join(path, "pytorch_model.bin"))
+        torch.save(self.state_dict(), os.path.join(path, "model.safetensors"))
         with open(os.path.join(path, "config.json"), "w") as f:
             json.dump(self.config, f)
