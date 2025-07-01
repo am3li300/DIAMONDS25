@@ -2,8 +2,8 @@ import numpy as np
 import torch
 import torch.functional as F
 import torch.nn as nn
-from embedding import FullyConnectedEmbed
-from contact import ContactCNN
+from DScript.models.embedding import FullyConnectedEmbed
+from DScript.models.contact import ContactCNN
 from huggingface_hub import PyTorchModelHubMixin
 
 

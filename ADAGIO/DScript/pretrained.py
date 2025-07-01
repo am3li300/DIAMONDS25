@@ -5,10 +5,10 @@ import sys
 
 import torch
 
-from .models.contact import ContactCNN
-from .models.embedding import FullyConnectedEmbed, SkipLSTM
-from .models.interaction import ModelInteraction
-from .utils import log
+from DScript.models.contact import ContactCNN
+from DScript.models.embedding import FullyConnectedEmbed, SkipLSTM
+from DScript.models.interaction import ModelInteraction
+from DScript.utils import log
 
 
 def build_lm_1(state_dict_path):
