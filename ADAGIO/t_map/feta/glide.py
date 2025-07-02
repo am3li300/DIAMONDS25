@@ -209,6 +209,9 @@ class ADAGIO(PreComputeFeta):
     """
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
         indexes = self._get_sorted_similarity_indexes()
+        """
+        call dscript
+        """
         self.candidate_pairs = pd.DataFrame(indexes, columns=["Gene1", "Gene2"])
         node_idx = self.gmap[node]
         graph_edges = self.graph.edges()
@@ -299,7 +302,7 @@ class ADAGIO(PreComputeFeta):
         """
         testing dscript
         """
-        dscript_predict(self.candidate_pairs, "DScript", "a.out", self.seq_dict, 0.5)
+        dscript_predict(self.candidate_pairs, "DScript/model.safetensors", "a.out", self.seq_dict, 0.5)
         if hasattr(self, "k_mat"):
             for disease_gene in disease_genes:
                 k_i = self.get_k_value_for_node(graph, disease_gene)

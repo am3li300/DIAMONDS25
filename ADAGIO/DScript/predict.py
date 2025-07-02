@@ -115,15 +115,11 @@ def dscript_predict(pairs_df, modelPath, outPath, seqDict, threshold, store_cmap
     # Load Model
     # log(f"Loading model from {modelPath}", file=logFile, print_also=True)
 
-    if modelPath.endswith(".safetensors"):
-        model = DSCRIPTModel.from_pretrained(os.path.dirname(modelPath), use_cuda=False)
-
-    else:
-        model = torch.load(modelPath, map_location=torch.device("cpu")).cpu()
-        
-    model.use_cuda = False
-
     """
+    invalid load key, '\xf0'.
+    Model DScript failed: invalid load key, '\xf0'.
+    """
+    
     if modelPath.endswith(".sav") or modelPath.endswith(".pt"):
         try:
             # if use_cuda:
@@ -154,7 +150,7 @@ def dscript_predict(pairs_df, modelPath, outPath, seqDict, threshold, store_cmap
             print(f"Model {modelPath} failed: {e}") # , file=logFile, print_also=True)
             # logFile.close()
             sys.exit(1)
-    """
+
     if (
         dict(model.named_parameters())["contact.hidden.conv.weight"].shape[1]
         == 242
