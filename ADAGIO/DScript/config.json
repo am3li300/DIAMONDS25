@@ -1,1 +1,16 @@
-{"emb_nin": 6165, "emb_nout": 100, "emb_dropout": 0.0, "con_embed_dim": 200, "con_hidden_dim": 50, "con_width": 7, "use_cuda": false, "do_w": true, "do_sigmoid": true, "do_pool": false, "pool_size": 9, "theta_init": 1, "lambda_init": 0, "gamma_init": 0}
+{
+  "con_embed_dim": 100,
+  "con_hidden_dim": 50,
+  "con_width": 7,
+  "do_pool": true,
+  "do_sigmoid": false,
+  "do_w": true,
+  "emb_dropout": 0.5,
+  "emb_nin": 6165,
+  "emb_nout": 100,
+  "gamma_init": 0,
+  "lambda_init": 0,
+  "pool_size": 9,
+  "theta_init": 1,
+  "use_cuda": false
+}
