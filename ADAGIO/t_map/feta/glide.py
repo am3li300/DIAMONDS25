@@ -124,15 +124,15 @@ class ADAGIO(PreComputeFeta):
         self.graph = deepcopy(self._original_graph)
 
     """
-    used by add_edges_to_graph
+    used by david_prioritize
     """
-    def construct_k_mat(self, graph, disease_genes: List[Gene]) -> dict[str, int]:
+    def construct_k_mat(self, graph, genes: List[Gene]) -> dict[str, int]:
         nodes = list(graph.nodes)
         total_sum = sum(graph.degree[node] for node in nodes)
         avg_degree = total_sum//len(nodes)
         max_edges_to_add = defaultdict(int)
         clustering_coefficients = nx.clustering(graph)
-        for node in disease_genes:
+        for node in genes:
             name = node.name
             # adaptive k function
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
@@ -206,8 +206,8 @@ class ADAGIO(PreComputeFeta):
     """
     David function
     """
-    def david_prioritize(self, graph: Union[nx.Graph, None], tissue_file: Optional[str] = None, 
-                disease_genes: List[Gene], max_threshold: int) -> Set[Tuple[Gene, float]]:
+    def david_prioritize(self, graph: Union[nx.Graph, None], tissue_file: Optional[str] = None,
+                                                max_threshold: int) -> Set[Tuple[Gene, float]]:
 
         # add most confident edges with adaptive k and maximum edge addition threshold
         if tissue_file:
@@ -215,21 +215,22 @@ class ADAGIO(PreComputeFeta):
  
         graph = deepcopy(self.graph)
         if max_threshold > 0:
-            self.k_mat = self.construct_k_mat(graph, graph.nodes)
+            genes = [Gene(name=node) for node in graph.nodes]
+            k_mat = self.construct_k_mat(graph, genes)
             indexes = self._get_sorted_similarity_indexes()
             for i, j in indexes:
                 node_indx1 = self.gmap[i]
                 node_indx2 = self.gmap[j]
 
                 # treat graph as undirected
-                val = min(self.k_mat[node_indx1], self.k_mat[node_indx2])
+                val = min(k_mat[node_indx1], k_mat[node_indx2])
                 if val > 0:
-                    self.graph.add_edge(self.rgmap[i],
+                    graph.add_edge(self.rgmap[i],
                         self.rgmap[j],
                         weight=self.gmat[i][j])
 
-                    self.k_mat[node_indx1] -= 1
-                    self.k_mat[node_indx2] -= 1
+                    k_mat[node_indx1] -= 1
+                    k_mat[node_indx2] -= 1
                     max_threshold -= 1
                     if not max_threshold:
                         break
