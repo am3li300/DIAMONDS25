@@ -83,7 +83,6 @@ class ADAGIO(PreComputeFeta):
         self.reweight_graph()
 
         self.candidate_pairs = pd.DataFrame()
-        self.k_mat = defaultdict(int)
         self.seq_dict = self.setup_fasta_dict()
 
     def setup_fasta_dict(self) -> dict[str, str]:
@@ -125,7 +124,7 @@ class ADAGIO(PreComputeFeta):
         self.graph = deepcopy(self._original_graph)
 
     """
-    not being used  ****USELESS***** 
+    used by add_edges_to_graph
     """
     def construct_k_mat(self, graph, disease_genes: List[Gene]) -> dict[str, int]:
         nodes = list(graph.nodes)
@@ -203,6 +202,45 @@ class ADAGIO(PreComputeFeta):
             self.graph = graph
         else:
             return graph
+
+    """
+    David function
+    """
+    def david_prioritize(self, graph: Union[nx.Graph, None], tissue_file: Optional[str] = None, 
+                disease_genes: List[Gene], max_threshold: int) -> Set[Tuple[Gene, float]]:
+
+        # add most confident edges with adaptive k and maximum edge addition threshold
+        if tissue_file:
+            graph = reweight_graph_by_tissue(graph, tissue_file)
+ 
+        graph = deepcopy(self.graph)
+        if max_threshold > 0:
+            self.k_mat = self.construct_k_mat(graph, graph.nodes)
+            indexes = self._get_sorted_similarity_indexes()
+            for i, j in indexes:
+                node_indx1 = self.gmap[i]
+                node_indx2 = self.gmap[j]
+
+                # treat graph as undirected
+                val = min(self.k_mat[node_indx1], self.k_mat[node_indx2])
+                if val > 0:
+                    self.graph.add_edge(self.rgmap[i],
+                        self.rgmap[j],
+                        weight=self.gmat[i][j])
+
+                    self.k_mat[node_indx1] -= 1
+                    self.k_mat[node_indx2] -= 1
+                    max_threshold -= 1
+                    if not max_threshold:
+                        break
+                    
+        print(len(graph.edges))
+        if hasattr(self, '__dada'):
+            return self.__dada.prioritize(disease_genes, graph)
+
+        else:
+            rwr = RandomWalkWithRestart(alpha=0.85)
+            return rwr.prioritize(disease_genes, graph)
 
     """
     send dscript scores as a parameter
@@ -297,12 +335,12 @@ class ADAGIO(PreComputeFeta):
 
         if tissue_file:
             graph = reweight_graph_by_tissue(graph, tissue_file)
-
+ 
         graph = deepcopy(self.graph)
         """
         testing dscript
         """
-        dscript_predict(self.candidate_pairs, "DScript/model.safetensors", "a.out", self.seq_dict, 0.5)
+        # dscript_predict(self.candidate_pairs, "DScript", "a.out", self.seq_dict, 0.5)
         if hasattr(self, "k_mat"):
             for disease_gene in disease_genes:
                 k_i = self.get_k_value_for_node(graph, disease_gene)

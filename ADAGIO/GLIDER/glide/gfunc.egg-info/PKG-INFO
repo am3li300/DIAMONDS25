@@ -1,11 +1,7 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: gfunc
 Version: 1
 Summary: Denoising graphs using diffusion state distance link prediction
 Home-page: https://github.com/kap-devkota/Trimming_Functional
 Author: Henri Schmidt and Kapil Devkota
 Author-email: henri.schmidt@tufts.edu
-Dynamic: author
-Dynamic: author-email
-Dynamic: home-page
-Dynamic: summary
