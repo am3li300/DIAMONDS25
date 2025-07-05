@@ -216,7 +216,7 @@ class ADAGIO(PreComputeFeta):
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
         if node not in self.gmap:
             return []
-            
+
         node_idx = self.gmap[node]
         indexes = self._get_sorted_similarity_indexes()
         """
@@ -390,8 +390,8 @@ class ADAGIO(PreComputeFeta):
             graph = reweight_graph_by_tissue(graph, tissue_file)
  
         graph = deepcopy(self.graph)
+        genes = [Gene(name=node) for node in graph.nodes]
         if max_threshold > 0:
-            genes = [Gene(name=node) for node in graph.nodes]
             k_mat = self.construct_k_mat(graph, genes)
             indexes = self._get_sorted_similarity_indexes()
             for i, j in indexes:
@@ -413,11 +413,11 @@ class ADAGIO(PreComputeFeta):
                     
         print(len(graph.edges))
         if hasattr(self, '__dada'):
-            return self.__dada.prioritize(disease_genes, graph)
+            return self.__dada.prioritize(genes, graph)
 
         else:
             rwr = RandomWalkWithRestart(alpha=0.85)
-            return rwr.prioritize(disease_genes, graph)
+            return rwr.prioritize(genes, graph)
 
     @classmethod
     def ADAGIO_with_pickle(cls, file_name: str, reset: bool = True) -> ADAGIO:
