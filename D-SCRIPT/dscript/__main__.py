@@ -6,11 +6,11 @@ import os
 import sys
 from typing import Union
 
-from .commands.embed import EmbeddingArguments
-from .commands.evaluate import EvaluateArguments
-from .commands.predict import PredictionArguments
-from .commands.train import TrainArguments
-from .commands.extract_3di import Extract3DiArguments
+from commands.embed import EmbeddingArguments
+from commands.evaluate import EvaluateArguments
+from commands.predict import PredictionArguments
+from commands.train import TrainArguments
+from commands.extract_3di import Extract3DiArguments
 
 DScriptArguments = Union[
     EmbeddingArguments,
@@ -34,12 +34,12 @@ class CitationAction(argparse.Action):
 
 
 def main():
-    from . import __version__
+    # from . import __version__
 
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument(
-        "-v", "--version", action="version", version="D-SCRIPT " + __version__
+         "-v", "--version", action="version", version="D-SCRIPT " # + __version__
     )
     parser.add_argument(
         "-c",
@@ -52,7 +52,7 @@ def main():
     subparsers = parser.add_subparsers(title="D-SCRIPT Commands", dest="cmd")
     subparsers.required = True
 
-    from .commands import (
+    from commands import (
         train,
         embed,
         evaluate,

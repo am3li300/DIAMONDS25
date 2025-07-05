@@ -13,11 +13,11 @@ import torch
 from tqdm import tqdm
 from typing import Callable, NamedTuple, Optional
 
-from ..fasta import parse
-from ..foldseek import get_foldseek_onehot, fold_vocab
-from ..language_model import lm_embed
-from ..utils import log, load_hdf5_parallel
-from ..models.interaction import DSCRIPTModel
+from fasta import parse
+from foldseek import get_foldseek_onehot, fold_vocab
+from language_model import lm_embed
+from utils import log, load_hdf5_parallel
+from models.interaction import DSCRIPTModel
 
 
 class PredictionArguments(NamedTuple):

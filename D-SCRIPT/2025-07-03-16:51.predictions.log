@@ -1,0 +1,3 @@
+[2025-07-03-16:51:52] Using CPU
+[2025-07-03-16:51:52] Loading model from ../ADAGIO/DScript
+[2025-07-03-16:51:52] Model ../ADAGIO/DScript failed: name 'safetensors' is not defined

@@ -21,19 +21,19 @@ import pandas as pd
 import gzip as gz
 from Bio import SeqIO
 
-from .. import __version__
-from ..alphabets import Uniprot21
-from ..glider import glide_compute_map, glider_score
-from ..foldseek import get_foldseek_onehot, fold_vocab
-from ..utils import (
+# from dscript import __version__
+from alphabets import Uniprot21
+from glider import glide_compute_map, glider_score
+from foldseek import get_foldseek_onehot, fold_vocab
+from utils import (
     PairedDataset,
     collate_paired_sequences,
     log,
     load_hdf5_parallel,
 )
-from ..models.embedding import FullyConnectedEmbed
-from ..models.contact import ContactCNN
-from ..models.interaction import ModelInteraction
+from models.embedding import FullyConnectedEmbed
+from models.contact import ContactCNN
+from models.interaction import ModelInteraction
 
 
 class TrainArguments(NamedTuple):
@@ -873,7 +873,7 @@ def main(args):
     else:
         output = open(output, "w")
 
-    log(f"D-SCRIPT Version {__version__}", file=output, print_also=True)
+    # log(f"D-SCRIPT Version {__version__}", file=output, print_also=True)
     log(f'Called as: {" ".join(sys.argv)}', file=output, print_also=True)
 
     # Set the device

@@ -23,7 +23,7 @@ from sklearn.metrics import (
 from Bio import SeqIO
 from tqdm import tqdm
 
-from ..utils import log, load_hdf5_parallel
+from utils import log, load_hdf5_parallel
 
 matplotlib.use("Agg")
 

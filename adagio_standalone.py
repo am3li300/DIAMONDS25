@@ -246,33 +246,17 @@ python3 main.py \
 """
 
 # cross validation
-"""
-python3 main.py \
-  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.tsv' \
-  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/schizophrenia/schizophrenia_new_seeds_0.txt' --out cross_validation_0.out
-"""
-
-"""
-python3 main.py \
-  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/PPI Networks/Human/Data/STRING_protein_links_parsed.tsv' \
-  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/rheumatoid_arthritis/RA_new_seeds_0.txt' --out RA_cross_validation_0.out
-"""
-
-"""
-python3 main.py \
-  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/data/networks/entrez_filtered_brain_0.3.tsv' \
-  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/partitioning/SZ_humanbase_brain/3_schizophrenia_new_seeds_0.txt' --out '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/validation_rankings/SZ_humanbase_brain/SZ_cross_validation_0.out'
-"""
-
-"""
-python3 main.py \
-  --network '../CSCI/DIAMONDS Tufts/DIAMONDS25/data/networks/filtered_brain_network_0.85.tsv' \
-  --genelist '../CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/partitioning/SZ_tissue_brain/3_schizophrenia_new_seeds_0.txt' --out SZ_tissue_cross_validation_0.out
-"""
 
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --genelist '../cross_validation/partitioning/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
   --out '../cross_validation/validation_rankings/SZ_STRING_adaptive_k/3_SZ_cross_validation_0.out'
+"""
+
+"""
+python3 main.py \
+  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/data/networks/STRING_sample_links.tsv' \
+  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/partitioning/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
+  --out d.out 
 """

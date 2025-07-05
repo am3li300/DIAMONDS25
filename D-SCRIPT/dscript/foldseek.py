@@ -7,7 +7,7 @@ import typing as T
 import subprocess as sp
 from Bio import SeqIO, SeqRecord, Seq
 
-from .utils import log
+from utils import log
 
 fold_vocab = {
     "D": 0,

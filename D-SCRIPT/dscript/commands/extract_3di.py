@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import NamedTuple, Callable
 from Bio import Seq, SeqRecord, SeqIO
 
-from ..utils import log
-from ..foldseek import get_3di_sequences
+from utils import log
+from foldseek import get_3di_sequences
 
 
 class Extract3DiArguments(NamedTuple):
