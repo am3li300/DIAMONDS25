@@ -24,7 +24,7 @@ def main():
     # cross_validation/schizophrenia
     path = input("Enter folder path to save output: ")
 
-    # data/20_data_drug_schizophrenia.txt
+    # data/seed_nodes/20_data_drug_schizophrenia.txt
     fileName = input("Enter seed file name: ")
     f = open(fileName, 'r')
     nodes = [ line[:-1] for line in f ]
