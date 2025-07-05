@@ -215,6 +215,7 @@ class ADAGIO(PreComputeFeta):
     """
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
         if node not in self.gmap:
+            print("{0} does not exist in self.gmap".format(node))
             return []
 
         node_idx = self.gmap[node]
@@ -311,7 +312,7 @@ class ADAGIO(PreComputeFeta):
                 to_add_pairs = self.add_edges_around_node(
                     disease_gene.name, k, variant)
                 for (i, j) in to_add_pairs:
-                    print(self.rgmap[i], self.rgmap[j], i, j)
+                    # print(self.rgmap[i], self.rgmap[j], i, j)
                     graph.add_edge(
                         self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
         if hasattr(self, "to_remove"):
