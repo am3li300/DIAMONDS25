@@ -1,20 +1,22 @@
-disease = input("Check SZ or RA output: ")
-filePath = "output/validation_rankings/" + ("rheumatoid_arthritis" if disease == "RA" else "schizophrenia") \
-            + f"/{disease}_cross_validation_"
+import os
 
-k = int(input("Enter k-value: "))
+# cross_validation/validation_rankings/SZ_STRING_adaptive_k
+directory_path = input("Enter directory path: ")
+k = int(input("Enter k value: "))
 flag = int(input("Include scores? 1: Yes, 0: No "))
 seen = set()
 
-for i in range(25):
-    file = open(f"{filePath}{str(i)}.out")
-    top_k = tuple([(line.split()[0] if not flag else f"{line.split()[0]} {line.split()[1][:-1]}") for line in file][-k:])
+for fileName in os.listdir(directory_path):
+    file = open(os.path.join(directory_path, fileName))
+    top_k = tuple([(line.split()[0] if not flag else f"{line.split()[0]} {line.split()[1]}") for line in file][-k:])
+    print(top_k)
     if top_k not in seen:
         seen.add(top_k)
 
     else:
         print(f"File {i} is not unique")
 
+"""
 flag = int(input("See distribution? 1: Yes, 0: No "))
 if flag:
     file = open(f"data/20_data_drug_{"rheumatoid_arthritis" if disease == "RA" else "schizophrenia"}.txt")
@@ -35,3 +37,4 @@ if flag:
 
     print("Min:", min(included.values()))
     print("Max:", max(included.values()))
+"""
