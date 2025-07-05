@@ -214,12 +214,15 @@ class ADAGIO(PreComputeFeta):
     send dscript scores as a parameter
     """
     def add_edges_around_node(self, node: str, new_edges_count: int, variant: str = "none") -> List[Tuple[int, int]]:
+        if node not in self.gmap:
+            return []
+            
+        node_idx = self.gmap[node]
         indexes = self._get_sorted_similarity_indexes()
         """
         call dscript
         """
         # self.candidate_pairs = pd.DataFrame(indexes, columns=["Gene1", "Gene2"])
-        node_idx = self.gmap[node]
         graph_edges = self.graph.edges()
         add_cnt = 0
         pairs_to_add = []
