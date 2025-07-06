@@ -131,23 +131,27 @@ class ADAGIO(PreComputeFeta):
         self.graph = deepcopy(self._original_graph)
 
     """
-    used by david_prioritize
+    adaptive k matrix
     """
     def construct_k_mat(self, graph, genes: List[Gene]) -> dict[str, int]:
-        nodes = list(graph.nodes)
+        nodes = set(graph.nodes)
         total_sum = sum(graph.degree[node] for node in nodes)
         avg_degree = total_sum//len(nodes)
         max_edges_to_add = defaultdict(int)
-        clustering_coefficients = nx.clustering(graph)
-        for node in genes:
-            name = node.name
+
+        print("Number of queried genes:", len(genes))
+        subset = [node.name for node in genes if node.name in nodes]
+        print("Number of queried genes in graph:", len(subset))
+
+        clustering_coefficients = nx.clustering(graph, nodes=subset)
+        for name in subset:
             # adaptive k function
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
 
         return max_edges_to_add
 
     """
-    new function
+    slow
     """
     def get_k_value_for_node(self, graph, node):
         nodes = list(graph.nodes)
@@ -296,7 +300,7 @@ class ADAGIO(PreComputeFeta):
             graph[u][v]['weight'] = gmat[gmap[u]][gmap[v]]
         return graph
 
-    def original_prioritize(self, disease_genes: List[Gene],
+    def prioritize(self, disease_genes: List[Gene],
                    graph: Union[nx.Graph, None],
                    tissue_file: Optional[str] = None,
                    variant: str = "none",
@@ -306,6 +310,11 @@ class ADAGIO(PreComputeFeta):
             graph = reweight_graph_by_tissue(graph, tissue_file)
 
         graph = deepcopy(self.graph)
+        """
+        testing dscript - candidate_pairs is currently invalid
+        """
+        # dscript_predict(self.candidate_pairs, "DScript", "a.out", self.seq_dict, 0.5)
+
         if hasattr(self, "k_mat"): # originally to_add
             k = self.k_mat.default_factory()
             for disease_gene in disease_genes:
@@ -332,10 +341,8 @@ class ADAGIO(PreComputeFeta):
             rwr = RandomWalkWithRestart(alpha=0.85)
             return rwr.prioritize(disease_genes, graph)
 
-    """
-    change self.to_add to call k function
-    """
-    def prioritize(self, disease_genes: List[Gene],
+
+    def david_prioritize_2(self, disease_genes: List[Gene],
                    graph: Union[nx.Graph, None],
                    tissue_file: Optional[str] = None,
                    variant: str = "none",
@@ -346,16 +353,10 @@ class ADAGIO(PreComputeFeta):
             graph = reweight_graph_by_tissue(graph, tissue_file)
  
         graph = deepcopy(self.graph)
-        """
-        testing dscript - candidate_pairs is currently invalid
-        """
-        # dscript_predict(self.candidate_pairs, "DScript", "a.out", self.seq_dict, 0.5)
-        counter = 0
         if hasattr(self, "k_mat"):
+            k_mat = self.construct_k_mat(graph, disease_genes)
             for disease_gene in disease_genes:
-                counter += 1
-                print(counter)
-                k_i = self.get_k_value_for_node(graph, disease_gene)
+                k_i = k_mat[disease_gene.name]
                 if k_i > 0:
                     pairs = self.add_edges_around_node(disease_gene.name,
                                                     k_i,
@@ -365,15 +366,6 @@ class ADAGIO(PreComputeFeta):
                                     self.rgmap[j],
                                     weight=self.gmat[i][j])
 
-        if hasattr(self, "to_remove"):
-            mst = tree.maximum_spanning_edges(
-                graph, algorithm="prim", data=False)
-            for disease_gene in disease_genes:
-                to_remove_pairs = self.remove_edges_around_node(
-                    disease_gene.name, self.to_remove, mst)
-                for (i, j) in to_remove_pairs:
-                    graph.add_edge(
-                        self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
         print(len(graph.edges))
         if hasattr(self, '__dada'):
             return self.__dada.prioritize(disease_genes, graph)
