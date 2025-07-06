@@ -4,13 +4,14 @@ import os
 # cross_validation/validation_rankings/SZ_STRING_adaptive_k
 directory_path = input("Enter directory path for input ranking: ")
 
-# cross_validation/validation_output_labels/SZ_STRING_david_prioritize
+# cross_validation/validation_output_labels/
 outfolder_path = input("Enter output folder path: ")
 reverse_flag = int(input("Enter 1 to read file in reverse, 0 otherwise: "))
-i = 0
 
 # Does not iterate through directory in order
 for fileName in os.listdir(directory_path):
+    i = int(fileName[-5])
+
     # Build file paths
     if reverse_flag:
         with FileReadBackwards(os.path.join(directory_path, fileName)) as infile_ranking:
@@ -57,5 +58,3 @@ for fileName in os.listdir(directory_path):
         infile_nonseeds.close()
         infile_seeds.close()
         outfile.close()
-    
-    i += 1
