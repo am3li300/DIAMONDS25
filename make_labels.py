@@ -9,6 +9,7 @@ outfolder_path = input("Enter output folder path: ")
 reverse_flag = int(input("Enter 1 to read file in reverse, 0 otherwise: "))
 i = 0
 
+# Does not iterate through directory in order
 for fileName in os.listdir(directory_path):
     # Build file paths
     if reverse_flag:
