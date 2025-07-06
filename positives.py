@@ -1,9 +1,10 @@
 import os
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
+# 11773 for STRING 3-fold schizophrenia
 NUM_GENES = int(input("Enter number of genes in network: ")) # 11882 for STRING network, 10317 for humanbase
 
 def count_positives(file, threshold):
@@ -37,7 +38,7 @@ def plot_auroc(avgFPR, avgRecall):
     plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapz(avgRecall, avgFPR)
+    auc_score = np.trapezoid(avgRecall, avgFPR)
     print(f"AUROC score: {auc_score:.4f}")
 
 def plot_auprc(avgRecall, avgPrecision):
@@ -50,7 +51,7 @@ def plot_auprc(avgRecall, avgPrecision):
     plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapz(avgPrecision, avgRecall)
+    auc_score = np.trapezoid(avgPrecision, avgRecall)
     print(f"AUPRC score: {auc_score:.4f}")
 
 
@@ -62,7 +63,7 @@ def main():
     -falseP represents the number of false positives found so far given a threshold; any gene not trying to be recovered within the threshold
     """
 
-    # cross_validation/validation_output_labels/SZ_humanbase_brain
+    # cross_validation/validation_output_labels/SZ_STRING_david_prioritize
     directory = input("Enter the folder path to validation labels: ")
 
     # 2-fold, 3-fold, etc.

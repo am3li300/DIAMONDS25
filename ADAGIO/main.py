@@ -14,7 +14,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         print(len(graph.graph.edges))
         model = ADAGIO()
         model.setup(graph.graph)
-        model.set_add_edges_amount(20)
+        model.set_add_edges_amount(20) # this will add edges to the graph
 
         """
         adaptive k for disease nodes only
@@ -24,12 +24,13 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         adaptive k for all nodes
         """
-        predictions = sorted(list(model.david_prioritize(1000, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.david_prioritize(1000, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         original prioritize (k = 20)
         """
-        # predictions = sorted(list(model.original_prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = sorted(list(model.original_prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+
         with open(out_path, "w") as f:
                 for gene, score in predictions:
                         f.write(f"{gene.name}\t{score}\n")
