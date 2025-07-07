@@ -19,7 +19,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         adaptive k for disease nodes only
         """
-        predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for all nodes
@@ -29,7 +29,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         original prioritize (k = 20)
         """
-        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         with open(out_path, "w") as f:
                 for gene, score in predictions:

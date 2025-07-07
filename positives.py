@@ -63,7 +63,7 @@ def main():
     -falseP represents the number of false positives found so far given a threshold; any gene not trying to be recovered within the threshold
     """
 
-    # cross_validation/validation_output_labels/SZ_STRING_david_prioritize
+    # cross_validation/validation_output_labels/
     directory = input("Enter the folder path to validation labels: ")
 
     # 2-fold, 3-fold, etc.

@@ -27,7 +27,7 @@ def main():
     # data/seed_nodes/20_data_drug_schizophrenia.txt
     fileName = input("Enter seed file name: ")
     f = open(fileName, 'r')
-    nodes = [ line[:-1] for line in f ]
+    nodes = [ line.strip() for line in f ]
 
     for i in range(int(input("Enter number of partitions: "))):
         partition(path, i, nodes, disease, two_or_three)
