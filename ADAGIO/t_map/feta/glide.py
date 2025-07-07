@@ -62,9 +62,7 @@ class ADAGIO(PreComputeFeta):
         return self.__desc
 
     def setup(self, graph: nx.Graph, *args, **kwargs) -> Any:
-        print("beginning setup")
         elist = list(graph.edges(data=True))
-        print("elist done")
         try:
             elist = list(
                 map(lambda x_y_z: (x_y_z[0], x_y_z[1], x_y_z[2]['weight']), elist))
@@ -75,14 +73,10 @@ class ADAGIO(PreComputeFeta):
                 map(lambda x_y_z: (x_y_z[0], x_y_z[1], 1), elist))
 
         self.graph = deepcopy(graph)
-        print("deepcopy done")
         self.gmat, self.gmap = glide_mat(
             elist, self.description().hyper_params)
-        print("gmat and gmap done")
         self.rgmap = {self.gmap[key]: key for key in self.gmap}
-        print("rgmap done")
         self._original_graph: nx.Graph = deepcopy(graph)
-        print("now reweighting graph...")
         # self._get_sorted_similarity_indexes()
         # self._get_sorted_similarity_indexes(descending=True)
         self.reweight_graph()
