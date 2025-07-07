@@ -376,7 +376,7 @@ class ADAGIO(PreComputeFeta):
     """
     David function
     """
-    def david_prioritize(self, max_threshold: int, graph: Union[nx.Graph, None], tissue_file: Optional[str] = None) -> Set[Tuple[Gene, float]]:
+    def david_prioritize(self, max_threshold: int, graph: Union[nx.Graph, None], adaptive_k: bool = False, tissue_file: Optional[str] = None) -> Set[Tuple[Gene, float]]:
 
         # add most confident edges with adaptive k and maximum edge addition threshold
         if tissue_file:
@@ -385,7 +385,7 @@ class ADAGIO(PreComputeFeta):
         graph = deepcopy(self.graph)
         genes = [Gene(name=node) for node in graph.nodes]
         if max_threshold > 0:
-            k_mat = self.construct_k_mat(graph, genes)
+            k_mat = self.construct_k_mat(graph, genes) if adaptive_k else defaultdict(lambda: float("inf"))
             indexes = self._get_sorted_similarity_indexes()
             for i, j in indexes:
                 node_indx1 = self.rgmap[i] # string names

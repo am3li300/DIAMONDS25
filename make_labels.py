@@ -1,7 +1,7 @@
 from file_read_backwards import FileReadBackwards
 import os
 
-# cross_validation/validation_rankings/SZ_STRING_adaptive_k
+# cross_validation/validation_rankings/
 directory_path = input("Enter directory path for input ranking: ")
 
 # cross_validation/validation_output_labels/
