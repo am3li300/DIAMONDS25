@@ -10,7 +10,7 @@ import networkx as nx
 from scipy.sparse import csr_matrix
 import markov_clustering as mc
 
-# import infomap
+import infomap
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -42,7 +42,14 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
                         clusters.append({indices_to_node[indx] for indx in c})
 
         elif algorithm == "infomap":
-                pass
+                im = infomap.Infomap()
+                for u, v, data in full_graph.edges(data=True):
+                        im.add_link(u, v, data["weight"])
+
+                im.run()
+                #clusters = im.modules
+                #print(clusters)
+                return []
 
         else:
                 return []
@@ -123,7 +130,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for disease nodes only (k = 20)
         """
-        predictions = clustering(network_path, genelist_path, out_path, "markov") # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = clustering(network_path, genelist_path, out_path, "infomap") # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         with open(out_path, "w") as f:
                 for gene, score in predictions:
