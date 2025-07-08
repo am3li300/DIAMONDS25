@@ -28,7 +28,7 @@ def main():
 
     # Does not iterate through directory in order
     for fileName in os.listdir(directory_path):
-        i = int(fileName[-5])
+        i = int(fileName[-5]) if not fileName[-6].isdigit() else int(fileName[-6])*10 + int(fileName[-5])
 
         # Build file paths
         if reverse_flag:

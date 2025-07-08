@@ -4,7 +4,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-# 11773 for STRING 3-fold schizophrenia
 NUM_GENES = int(input("Enter number of genes in network: ")) # 11882 for STRING network, 10317 for humanbase
 
 def count_positives(file, threshold):

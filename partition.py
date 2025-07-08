@@ -21,7 +21,7 @@ def main():
     two_or_three = int(input("Enter 1 for 2-partitioning, 0 for 3-partitioning: "))
     disease = input("Enter disease: ")
 
-    # cross_validation/schizophrenia
+    # cross_validation/partitioning/
     path = input("Enter folder path to save output: ")
 
     # data/seed_nodes/20_data_drug_schizophrenia.txt
@@ -29,8 +29,9 @@ def main():
     f = open(fileName, 'r')
     nodes = [ line.strip() for line in f ]
 
+    offset = int(input("Enter offset for file number: "))
     for i in range(int(input("Enter number of partitions: "))):
-        partition(path, i, nodes, disease, two_or_three)
+        partition(path, i+offset, nodes, disease, two_or_three)
 
     print("All done!")
     

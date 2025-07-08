@@ -24,10 +24,8 @@ def clustering(network_path, genelist_path, out_path):
         # make graph from network_path and get clusters
         full_graph = nx.read_weighted_edgelist(network_path)
         clusters = nx.community.louvain_communities(full_graph)
-
         n = len(clusters)
-        gene_mapping = {} # store index for gene_groups
-        gene_groups = [[] for _ in range(n)] # store the actual groups
+        gene_groups = [[] for _ in range(n)] # store the seed nodes for each cluster
 
         # store seed nodes as gene objects in a list from genelist_path
         with open(genelist_path) as f:
@@ -35,7 +33,6 @@ def clustering(network_path, genelist_path, out_path):
                 gene = line.strip()
                 for i in range(n):
                         if gene in clusters[i]:
-                                gene_mapping[gene] = i
                                 gene_groups[i].append(Gene(name=gene))
                                 
         # generate rankings for each cluster
