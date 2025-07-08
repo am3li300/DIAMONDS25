@@ -1,12 +1,16 @@
-import argparse
 from t_map.garbanzo.edgelist import EdgeListGarbanzo
 from t_map.feta.glide import ADAGIO
+from t_map.gene.gene import Gene
+
+import argparse
 from time import time
 from heapq import heapify, heappush, heappop
+
 import networkx as nx
-from t_map.gene.gene import Gene
 from scipy.sparse import csr_matrix
 import markov_clustering as mc
+
+# import infomap
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -16,13 +20,7 @@ parser.add_argument('--out', '-o', type=str, default="adagio.out",help="Path to 
 
 def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
         def create_cluster_graph(graph, cluster):
-                # return graph.subgraph(cluster).copy()
-                new_graph = graph.copy()
-                for node in graph.nodes:
-                        if node not in cluster:
-                                new_graph.remove_node(node)
-                
-                return new_graph
+                return graph.subgraph(cluster).copy()
 
         # make graph from network_path and get clusters
         full_graph = nx.read_weighted_edgelist(network_path)
@@ -41,6 +39,9 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
                 for c in clustering:
                         clusters.append({indices_to_node[indx] for indx in c})
 
+        elif algorithm == "infomap":
+                pass
+
         else:
                 return []
 
@@ -58,14 +59,20 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
         # generate rankings for each cluster
         rankings = []
         for i, cluster in enumerate(clusters):
-                if (len(gene_groups[i]) == 0):
+                if (not gene_groups[i]):
                         continue
 
                 sub_graph = create_cluster_graph(full_graph, cluster)
+
+                # only keep seeds with at least one edge (not isolated)
+                seeds = [g for g in gene_groups[i] if sub_graph.degree(g.name) > 0]
+                if not seeds:
+                        continue
+                        
                 model = ADAGIO()
                 model.setup(sub_graph)
                 model.set_add_edges_amount(20)
-                rankings.append(sorted(list(model.prioritize(gene_groups[i], sub_graph)), key=lambda x: -x[1]))
+                rankings.append(sorted(list(model.prioritize(seeds, sub_graph)), key=lambda x: -x[1]))
         
         # merge rankings (merge k sorted lists)
         heap = []
