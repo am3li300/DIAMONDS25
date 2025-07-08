@@ -5,6 +5,8 @@ from time import time
 from heapq import heapify, heappush, heappop
 import networkx as nx
 from t_map.gene.gene import Gene
+from scipy.sparse import csr_matrix
+import markov_clustering as mc
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -12,8 +14,9 @@ parser.add_argument('--genelist', '-g', type=str, required=True, help="Path to g
 parser.add_argument('--out', '-o', type=str, default="adagio.out",help="Path to output results")
 
 
-def clustering(network_path, genelist_path, out_path):
+def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
         def create_cluster_graph(graph, cluster):
+                # return graph.subgraph(cluster).copy()
                 new_graph = graph.copy()
                 for node in graph.nodes:
                         if node not in cluster:
@@ -23,7 +26,24 @@ def clustering(network_path, genelist_path, out_path):
 
         # make graph from network_path and get clusters
         full_graph = nx.read_weighted_edgelist(network_path)
-        clusters = nx.community.louvain_communities(full_graph)
+        if algorithm == "louvain":
+                clusters = nx.community.louvain_communities(full_graph)
+
+        elif algorithm == "markov":
+                indices_to_node = list(full_graph.nodes())
+
+                matrix_array = nx.to_scipy_sparse_array(full_graph, nodelist=indices_to_node)
+                matrix = csr_matrix(matrix_array)
+                res = mc.run_mcl(matrix)
+
+                clustering = mc.get_clusters(res)
+                clusters = []
+                for c in clustering:
+                        clusters.append({indices_to_node[indx] for indx in c})
+
+        else:
+                return []
+
         n = len(clusters)
         gene_groups = [[] for _ in range(n)] # store the seed nodes for each cluster
 
@@ -40,6 +60,7 @@ def clustering(network_path, genelist_path, out_path):
         for i, cluster in enumerate(clusters):
                 if (len(gene_groups[i]) == 0):
                         continue
+
                 sub_graph = create_cluster_graph(full_graph, cluster)
                 model = ADAGIO()
                 model.setup(sub_graph)
@@ -93,7 +114,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for disease nodes only (k = 20)
         """
-        predictions = clustering(network_path, genelist_path, out_path) # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = clustering(network_path, genelist_path, out_path, "markov") # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         with open(out_path, "w") as f:
                 for gene, score in predictions:
