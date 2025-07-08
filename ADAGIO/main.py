@@ -32,6 +32,8 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
 
                 matrix_array = nx.to_scipy_sparse_array(full_graph, nodelist=indices_to_node)
                 matrix = csr_matrix(matrix_array)
+
+                # expansion = 2, inflation = 2
                 res = mc.run_mcl(matrix)
 
                 clustering = mc.get_clusters(res)
@@ -68,7 +70,7 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
                 seeds = [g for g in gene_groups[i] if sub_graph.degree(g.name) > 0]
                 if not seeds:
                         continue
-                        
+
                 model = ADAGIO()
                 model.setup(sub_graph)
                 model.set_add_edges_amount(20)
