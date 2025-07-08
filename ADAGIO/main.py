@@ -10,7 +10,7 @@ import networkx as nx
 from scipy.sparse import csr_matrix
 import markov_clustering as mc
 
-import infomap
+import igraph as ig
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -28,9 +28,9 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
                 clusters = nx.community.louvain_communities(full_graph)
 
         elif algorithm == "markov":
-                indices_to_node = list(full_graph.nodes())
+                indices_to_nodes = list(full_graph.nodes())
 
-                matrix_array = nx.to_scipy_sparse_array(full_graph, nodelist=indices_to_node)
+                matrix_array = nx.to_scipy_sparse_array(full_graph, nodelist=indices_to_nodes)
                 matrix = csr_matrix(matrix_array)
 
                 # expansion = 2, inflation = 2
@@ -39,17 +39,26 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
                 clustering = mc.get_clusters(res)
                 clusters = []
                 for c in clustering:
-                        clusters.append({indices_to_node[indx] for indx in c})
+                        clusters.append({indices_to_nodes[indx] for indx in c})
 
-        elif algorithm == "infomap":
-                im = infomap.Infomap()
-                for u, v, data in full_graph.edges(data=True):
-                        im.add_link(u, v, data["weight"])
+        elif algorithm == "walktrap":
+                indices_to_nodes = list(full_graph.nodes())
+                nodes_to_indices = {node: i for i, node in enumerate(indices_to_nodes)}
 
-                im.run()
-                #clusters = im.modules
-                #print(clusters)
-                return []
+                edges = [(nodes_to_indices[u], nodes_to_indices[v]) for u, v in full_graph.edges()]
+                weights = [full_graph[u][v]["weight"] for u, v in full_graph.edges()]
+
+                iGraph = ig.Graph(edges=edges, directed=False)
+                iGraph.vs["name"] = indices_to_nodes
+                iGraph.es["weight"] = weights
+
+                # steps = 3-5
+                wtrap = iGraph.community_walktrap(steps=4, weights="weight")
+                clustering = list(wtrap.as_clustering())
+                clusters = []
+
+                for c in clustering:
+                        clusters.append({indices_to_nodes[indx] for indx in c})
 
         else:
                 return []
@@ -130,7 +139,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for disease nodes only (k = 20)
         """
-        predictions = clustering(network_path, genelist_path, out_path, "infomap") # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = clustering(network_path, genelist_path, out_path, "walktrap") # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         with open(out_path, "w") as f:
                 for gene, score in predictions:
