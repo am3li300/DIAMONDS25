@@ -19,10 +19,15 @@ for gene in df.iloc[:, 0]:
 for gene in df.iloc[:, 1]:
     genes.add(str(gene))
 
+seed_set = set()
 fout = open(out_path, "w")
 with open(seed_path) as seeds:
     for seed in seeds:
         seed = seed.strip()
-        if seed in genes:
+        if seed in genes and seed not in seed_set:
             fout.write(seed + '\n')
+        else:
+            print(seed)
+            
+        seed_set.add(seed)
 
