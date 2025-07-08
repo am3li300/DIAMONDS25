@@ -330,7 +330,7 @@ class DSCRIPTModel(ModelInteraction, PyTorchModelHubMixin):
             lambda_init=lambda_init,
             gamma_init=gamma_init,
         )
-
+"""
     @classmethod
     def from_pretrained(cls, model_dir, use_cuda=False):
         from pathlib import Path
@@ -356,3 +356,4 @@ class DSCRIPTModel(ModelInteraction, PyTorchModelHubMixin):
         torch.save(self.state_dict(), os.path.join(path, "model.safetensors"))
         with open(os.path.join(path, "config.json"), "w") as f:
             json.dump(self.config, f)
+"""

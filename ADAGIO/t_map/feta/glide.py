@@ -305,7 +305,7 @@ class ADAGIO(PreComputeFeta):
         """
         testing dscript - candidate_pairs is currently invalid
         """
-        # dscript_predict(self.candidate_pairs, "DScript", "a.out", self.seq_dict, 0.5)
+        # dscript_predict(self.candidate_pairs, "DScript/model.safetensors", "a.out", self.seq_dict, 0.5)
 
         print("The graph originally has " + str(len(graph.edges)) + " edges")
 
