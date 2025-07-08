@@ -80,12 +80,11 @@ class ADAGIO(PreComputeFeta):
         # self._get_sorted_similarity_indexes()
         # self._get_sorted_similarity_indexes(descending=True)
         self.reweight_graph()
-        print("reweight done")
         self.candidate_pairs = pd.DataFrame()
         self.seq_dict = self.setup_fasta_dict()
+        print("Finished graph set up...")
 
     def setup_fasta_dict(self) -> dict[str, str]:
-        print("fasta dict start")
         # data/UP000005640_9606.fasta
         file = open("../data/UP000005640_9606.fasta") #input("Enter file path for gene sequences: "))
         mapping = defaultdict(str)
@@ -105,7 +104,6 @@ class ADAGIO(PreComputeFeta):
                 sequence.append(line.strip())
 
         mapping[gene] = "".join(sequence)
-        print("fasta dict finished")
         return mapping
 
     """
@@ -309,6 +307,8 @@ class ADAGIO(PreComputeFeta):
         """
         # dscript_predict(self.candidate_pairs, "DScript", "a.out", self.seq_dict, 0.5)
 
+        print("The graph originally has " + str(len(graph.edges)) + " edges")
+
         if hasattr(self, "k_mat"): # originally to_add
             k = self.k_mat.default_factory()
             for disease_gene in disease_genes:
@@ -328,7 +328,7 @@ class ADAGIO(PreComputeFeta):
                     graph.add_edge(
                         self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
 
-        print(len(graph.edges))
+        print("The graph now has " + str(len(graph.edges)) + " edges")
         if hasattr(self, '__dada'):
             return self.__dada.prioritize(disease_genes, graph)
         else:
