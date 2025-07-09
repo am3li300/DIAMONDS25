@@ -23,6 +23,7 @@ from networkx.algorithms import tree
 # sys.path.append(script_dir)
 
 from DScript.predict import dscript_predict
+from DScript.models.interaction import DSCRIPTModel
 
 class bcolors:
     HEADER = '\033[95m'

@@ -9,6 +9,7 @@ from heapq import heapify, heappush, heappop
 import networkx as nx
 from scipy.sparse import csr_matrix
 import markov_clustering as mc
+from local_community_detection import greedy_source_expansion
 
 import igraph as ig
 
@@ -18,12 +19,64 @@ parser.add_argument('--genelist', '-g', type=str, required=True, help="Path to g
 parser.add_argument('--out', '-o', type=str, default="adagio.out",help="Path to output results")
 
 
-def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
-        def create_cluster_graph(graph, cluster):
-                return graph.subgraph(cluster).copy()
+def get_disease_genes(genelist_path):
+        disease_genes = []
+        with open(genelist_path) as f:
+            for line in f.readlines():
+                disease_genes.append(line.strip())
 
-        # make graph from network_path and get clusters
+        return disease_genes
+
+def merge_rankings(rankings):
+        heap = []
+        for i, ranking in enumerate(rankings):
+                if ranking:
+                        heap.append((-ranking[0][1], ranking[0][0].name, i, 0))
+ 
+        heapify(heap)
+        res = []
+        while heap:
+                score, gene, indx, jndx = heappop(heap)
+                res.append((Gene(name=gene), -score))
+                if jndx < len(rankings[indx])-1:
+                        heappush(heap, (-rankings[indx][jndx+1][1], rankings[indx][jndx+1][0].name, indx, jndx+1))
+
+        return res
+         
+def get_cluster_rankings(clusters, full_graph, disease_genes):
+        n = len(clusters)
+        gene_groups = [[] for _ in range(n)] # store the seed nodes for each cluster
+
+        # store seed nodes as gene objects in a list from genelist_path
+        for gene in disease_genes:
+                for i in range(n):
+                        if gene in clusters[i]:
+                                gene_groups[i].append(Gene(name=gene))
+                                
+        # generate rankings for each cluster
+        rankings = []
+        for i, cluster in enumerate(clusters):
+                if (not gene_groups[i]):
+                        continue
+
+                sub_graph = full_graph.subgraph(cluster).copy()
+
+                # only keep seeds with at least one edge (not isolated)
+                seeds = [g for g in gene_groups[i] if sub_graph.degree(g.name) > 0]
+                if not seeds:
+                        continue
+
+                model = ADAGIO()
+                model.setup(sub_graph)
+                model.set_add_edges_amount(20)
+                rankings.append(sorted(list(model.prioritize(seeds, sub_graph)), key=lambda x: -x[1]))
+
+        return rankings
+
+def clustering(network_path, genelist_path, algorithm="louvain"):
         full_graph = nx.read_weighted_edgelist(network_path)
+        disease_genes = get_disease_genes(genelist_path)
+
         if algorithm == "louvain":
                 clusters = nx.community.louvain_communities(full_graph)
 
@@ -63,63 +116,44 @@ def clustering(network_path, genelist_path, out_path, algorithm="louvain"):
         else:
                 return []
 
-        n = len(clusters)
-        gene_groups = [[] for _ in range(n)] # store the seed nodes for each cluster
-
-        # store seed nodes as gene objects in a list from genelist_path
-        with open(genelist_path) as f:
-            for line in f.readlines():
-                gene = line.strip()
-                for i in range(n):
-                        if gene in clusters[i]:
-                                gene_groups[i].append(Gene(name=gene))
-                                
-        # generate rankings for each cluster
-        rankings = []
-        for i, cluster in enumerate(clusters):
-                if (not gene_groups[i]):
-                        continue
-
-                sub_graph = create_cluster_graph(full_graph, cluster)
-
-                # only keep seeds with at least one edge (not isolated)
-                seeds = [g for g in gene_groups[i] if sub_graph.degree(g.name) > 0]
-                if not seeds:
-                        continue
-
-                model = ADAGIO()
-                model.setup(sub_graph)
-                model.set_add_edges_amount(20)
-                rankings.append(sorted(list(model.prioritize(seeds, sub_graph)), key=lambda x: -x[1]))
-        
-        # merge rankings (merge k sorted lists)
-        heap = []
-        for i, ranking in enumerate(rankings):
-                if ranking:
-                        heap.append((-ranking[0][1], ranking[0][0].name, i, 0))
- 
-        heapify(heap)
-        res = []
-        while heap:
-                score, gene, indx, jndx = heappop(heap)
-                res.append((Gene(name=gene), -score))
-                if jndx < len(rankings[indx])-1:
-                        heappush(heap, (-rankings[indx][jndx+1][1], rankings[indx][jndx+1][0].name, indx, jndx+1))
-
-        return res
+        disease_genes = get_disease_genes(genelist_path)
+        rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
+        return merge_rankings(rankings)
         
         
+def supervised_clustering(network_path, genelist_path):
+        full_graph = nx.read_weighted_edgelist(network_path)
+        disease_genes = get_disease_genes(genelist_path)
+
+        clusters = []
+        for gene in disease_genes:
+                # can explore changing the cutoff parameter for this function later
+                clusters.append(greedy_source_expansion(full_graph, source=gene))
+
+        # look at clusters possibly merge who knows
+
+        rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
+        ranking_dict = {}
+
+        for ranking in rankings:
+                for gene, score in ranking:
+                        ranking_dict[gene.name] = max(ranking_dict.get(gene.name, 0), score)
+        
+        return sorted([[Gene(x), ranking_dict[x]] for x in ranking_dict], key=lambda x: -x[1])
+
+
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         start = time()
 
         """
-        ADAGIO with no cluster handling
+        Baseline ADAGIO - constant k for disease nodes only (k = 20)
         """
         # graph = EdgeListGarbanzo(network_path, genelist_path)
         # print(len(graph.graph.edges))
         # model = ADAGIO()
         # model.setup(graph.graph)
         # model.set_add_edges_amount(20) # this will add edges to the graph
+        # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
@@ -136,10 +170,17 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         # predictions = sorted(list(model.david_prioritize(1000, graph.graph)), key=lambda x: x[1], reverse=True)
 
+
         """
-        constant k for disease nodes only (k = 20)
+        unsupervised clustering
         """
-        predictions = clustering(network_path, genelist_path, out_path, "walktrap") # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = clustering(network_path, genelist_path)
+
+        """ 
+        supervised clustering
+        """
+        predictions = supervised_clustering(network_path, genelist_path)
+
 
         with open(out_path, "w") as f:
                 for gene, score in predictions:
