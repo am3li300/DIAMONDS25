@@ -58,8 +58,8 @@ def main():
 
         else:
             infile_ranking = open(os.path.join(directory_path, fileName))
-            infile_nonseeds = open("cross_validation/partitioning/schizophrenia_STRING/3_schizophrenia_non_seeds_{0}.txt".format(i))
-            infile_seeds = open("cross_validation/partitioning/schizophrenia_STRING/3_schizophrenia_new_seeds_{0}.txt".format(i))
+            infile_nonseeds = open("cross_validation/partitioning/SZ_STRING_louvain_clustering/3_schizophrenia_non_seeds_{0}.txt".format(i))
+            infile_seeds = open("cross_validation/partitioning/SZ_STRING_louvain_clustering/3_schizophrenia_new_seeds_{0}.txt".format(i))
             outfile = open("{0}/SZ_validation_labels_{1}".format(outfolder_path, i), 'w')
 
             # Prepare seed/nonseed sets

@@ -70,7 +70,10 @@ def main():
 
     # 163 for schizophrenia, 95 for RA, 114 for humanbase SZ
     numDisease = int(input("Enter total number of seed genes: "))
-    numPos = numDisease // partition
+
+    # numPos = numDisease // partition
+    # clustering louvain: 51; clustering markov: 50; walktrap: 49
+    numPos = int(input("Enter number of total positives (genes trying to be recovered: "))
     numNeg = NUM_GENES - numPos
 
     recall = [0]*(NUM_GENES + 1) # same as TPR

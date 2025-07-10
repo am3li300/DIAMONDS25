@@ -61,9 +61,12 @@ def get_cluster_rankings(clusters, full_graph, disease_genes):
                         if gene in clusters[i]:
                                 gene_groups[i].append(Gene(name=gene))
 
+        """
         # generate cross validation partitions
         p(clusters, [[g.name for g in genes] for genes in gene_groups])
         return []
+        """
+        
         # generate rankings for each cluster
         rankings = []
         for i, cluster in enumerate(clusters):
@@ -215,7 +218,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         unsupervised clustering - louvain, markov, walktrap
         """
-        predictions = clustering(network_path, genelist_path)
+        predictions = clustering(network_path, genelist_path, algorithm="walktrap")
 
         """ 
         supervised clustering
