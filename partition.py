@@ -37,7 +37,7 @@ def p(clusters=None, gene_groups=None):
     disease = input("Enter disease: ")
 
     # cross_validation/partitioning/
-    # SZ_STRING_unsupervised_clustering
+    # SZ_STRING_louvain_clustering
     path = input("Enter folder path to save output: ")
 
     # data/seed_nodes/20_data_drug_schizophrenia.txt
