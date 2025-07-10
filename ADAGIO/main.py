@@ -12,6 +12,14 @@ import markov_clustering as mc
 from local_community_detection import greedy_source_expansion
 
 import igraph as ig
+import multiprocessing
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from partition import *
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -52,7 +60,11 @@ def get_cluster_rankings(clusters, full_graph, disease_genes):
                 for i in range(n):
                         if gene in clusters[i]:
                                 gene_groups[i].append(Gene(name=gene))
-                                
+
+        # generate cross validation partitions
+        # p(clusters, [[g.name for g in genes] for genes in gene_groups])
+        p()
+        return []
         # generate rankings for each cluster
         rankings = []
         for i, cluster in enumerate(clusters):
@@ -119,19 +131,49 @@ def clustering(network_path, genelist_path, algorithm="louvain"):
         disease_genes = get_disease_genes(genelist_path)
         rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
         return merge_rankings(rankings)
-        
+
+
+def gse_helper(graph, gene):
+        return greedy_source_expansion(graph, source=gene)
         
 def supervised_clustering(network_path, genelist_path):
+        def jaccard(set1, set2):
+                union = set1.union(set2)
+                intersection = set1.intersection(set2)
+                return float(len(intersection))/len(union) if union else 0
+
         full_graph = nx.read_weighted_edgelist(network_path)
         disease_genes = get_disease_genes(genelist_path)
+   
+        gse_args = [(full_graph, gene) for gene in disease_genes]
 
-        clusters = []
-        for gene in disease_genes:
-                # can explore changing the cutoff parameter for this function later
-                clusters.append(greedy_source_expansion(full_graph, source=gene))
+        with multiprocessing.Pool() as pool:
+                clusters = pool.starmap(gse_helper, gse_args)
 
-        # look at clusters possibly merge who knows
+        # clusters = list(starmap(lambda g, s: greedy_source_expansion(g, source=s), gse_args))
+        # for i, gene in enumerate(disease_genes):
+        #         # can explore changing the cutoff parameter for this function later
+        #         print(i)
+        #         clusters.append(greedy_source_expansion(full_graph, source=gene))
 
+        # get jaccard matrix of clusters
+
+        n = len(clusters)
+        jmat = [[0]*n for _ in range(n)]
+        dick = {}
+        for i in range(n - 1):
+                jmat[i][i] = 1
+                for j in range(i + 1, n):
+                        jmat[i][j] = jmat[j][i] = jaccard(clusters[i], clusters[j])
+                        num = round(jmat[i][j], 2)
+                        dick[num] = dick.get(num, 0) + 1
+
+        for i in range(n):
+                jmat[n - 1][i] = jmat[i][n - 1]
+        
+
+        print(dick)
+        
         rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
         ranking_dict = {}
 
@@ -172,14 +214,14 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
 
 
         """
-        unsupervised clustering
+        unsupervised clustering - louvain, markov, walktrap
         """
-        # predictions = clustering(network_path, genelist_path)
+        predictions = clustering(network_path, genelist_path)
 
         """ 
         supervised clustering
         """
-        predictions = supervised_clustering(network_path, genelist_path)
+        # predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
