@@ -22,7 +22,7 @@ def main():
         return
 
     # cross_validation/validation_rankings/
-    directory_path = input("Enter directory path for input ranking: ")
+    directory_path = input("Enter directory path for input rankings: ")
 
     # cross_validation/validation_output_labels/
     outfolder_path = input("Enter output folder path: ")

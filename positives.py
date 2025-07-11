@@ -73,7 +73,7 @@ def main():
 
     # numPos = numDisease // partition
     # clustering louvain: 51; clustering markov: 50; walktrap: 49
-    numPos = int(input("Enter number of total positives (genes trying to be recovered: "))
+    numPos = int(input("Enter number of total positives (genes trying to be recovered): "))
     numNeg = NUM_GENES - numPos
 
     recall = [0]*(NUM_GENES + 1) # same as TPR
