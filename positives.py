@@ -40,7 +40,7 @@ def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
     tpr_seg = np.concatenate(([0.0], tpr_seg))
 
     # rescale
-    partial_auc = np.trapz(tpr_seg, fpr_seg)
+    partial_auc = np.trapezoid(tpr_seg, fpr_seg)
     return partial_auc / fpr_max
 
 def count_positives(file, threshold):
@@ -125,10 +125,10 @@ def main():
         f = open(directory + '/' + file, 'r')
         for threshold in range(1, NUM_GENES + 1):
             f.seek(0)
+            trueP, falseP = count_positives(f, threshold)
             if threshold == 100:
                 print(trueP*1.0/numPos)
-
-            trueP, falseP = count_positives(f, threshold)
+                
             recall[threshold] += trueP*1.0 / numPos
             FPR[threshold] += falseP*1.0 / numNeg
             precision[threshold] += trueP*1.0 / threshold
