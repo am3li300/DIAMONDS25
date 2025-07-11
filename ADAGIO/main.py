@@ -218,7 +218,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         unsupervised clustering - louvain, markov, walktrap
         """
-        predictions = clustering(network_path, genelist_path, algorithm="walktrap")
+        predictions = clustering(network_path, genelist_path, algorithm="markov")
 
         """ 
         supervised clustering
