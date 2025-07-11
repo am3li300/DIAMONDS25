@@ -143,7 +143,6 @@ def main():
         avgRecall[i] = recall[i]/numFiles
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
-    
 
     plot_auroc(avgFPR, avgRecall)
 

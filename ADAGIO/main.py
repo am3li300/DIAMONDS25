@@ -61,11 +61,10 @@ def get_cluster_rankings(clusters, full_graph, disease_genes):
                         if gene in clusters[i]:
                                 gene_groups[i].append(Gene(name=gene))
 
-        """
+
         # generate cross validation partitions
-        p(clusters, [[g.name for g in genes] for genes in gene_groups])
-        return []
-        """
+        # p(clusters, [[g.name for g in genes] for genes in gene_groups])
+        # return []
         
         # generate rankings for each cluster
         rankings = []

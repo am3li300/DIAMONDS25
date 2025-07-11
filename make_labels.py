@@ -28,6 +28,10 @@ def main():
     outfolder_path = input("Enter output folder path: ")
     reverse_flag = int(input("Enter 1 to read file in reverse, 0 otherwise: "))
 
+    infile_path = input("Enter path to partitionings: ")
+    num_folds = input("Enter number of folds: ")
+    disease = input("Enter disease: ")
+
     # Does not iterate through directory in order
     for fileName in os.listdir(directory_path):
         i = int(fileName[-5]) if not fileName[-6].isdigit() else int(fileName[-6])*10 + int(fileName[-5])
@@ -58,9 +62,9 @@ def main():
 
         else:
             infile_ranking = open(os.path.join(directory_path, fileName))
-            infile_nonseeds = open("cross_validation/partitioning/RA_STRING_walktrap_clustering/3_RA_non_seeds_{0}.txt".format(i))
-            infile_seeds = open("cross_validation/partitioning/RA_STRING_walktrap_clustering/3_RA_new_seeds_{0}.txt".format(i))
-            outfile = open("{0}/RA_validation_labels_{1}".format(outfolder_path, i), 'w')
+            infile_nonseeds = open(f"{infile_path}/{num_folds}_{disease}_non_seeds_{i}.txt")
+            infile_seeds = open(f"{infile_path}/{num_folds}_{disease}_new_seeds_{i}.txt")
+            outfile = open(f"{outfolder_path}/{disease}_validation_labels_{i}", 'w')
 
             # Prepare seed/nonseed sets
             nonseeds = {line.strip() for line in infile_nonseeds}
