@@ -39,7 +39,7 @@ def p(clusters=None, gene_groups=None):
     # cross_validation/partitioning/
     # SZ_STRING_louvain_clustering
     path = input("Enter folder path to save output: ")
-
+    
     # data/seed_nodes/20_data_drug_schizophrenia.txt
     fileName = input("Enter seed file name: ")
     f = open(fileName, 'r')
