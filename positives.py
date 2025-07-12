@@ -128,7 +128,7 @@ def main():
             trueP, falseP = count_positives(f, threshold)
             if threshold == 100:
                 print(trueP*1.0/numPos)
-                
+
             recall[threshold] += trueP*1.0 / numPos
             FPR[threshold] += falseP*1.0 / numNeg
             precision[threshold] += trueP*1.0 / threshold

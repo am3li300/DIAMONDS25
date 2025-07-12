@@ -28,6 +28,7 @@ def main():
     outfolder_path = input("Enter output folder path: ")
     reverse_flag = int(input("Enter 1 to read file in reverse, 0 otherwise: "))
 
+    # cross_validation/partitioning/
     infile_path = input("Enter path to partitionings: ")
     num_folds = input("Enter number of folds: ")
     disease = input("Enter disease: ")
