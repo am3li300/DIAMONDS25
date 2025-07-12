@@ -36,11 +36,10 @@ def p(clusters=None, gene_groups=None):
     two_or_three = int(input("Enter 1 for 2-partitioning, 0 for 3-partitioning: "))
     disease = input("Enter disease: ")
 
-    # cross_validation/partitioning/
-    # SZ_STRING_louvain_clustering
+    # cross_validation/partitions/
     path = input("Enter folder path to save output: ")
 
-    # data/seed_nodes/20_data_drug_schizophrenia.txt
+    # data/seed_nodes/
     fileName = input("Enter seed file name: ")
     f = open(fileName, 'r')
     nodes = [ line.strip() for line in f ]

@@ -235,7 +235,7 @@ glide-compute \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../data/seed_nodes/schizophrenia_drug.txt' 
+  --genelist '../data/seed_nodes/rheumatoid_arthritis_drug.txt' 
 """
 
 # cross validation
@@ -243,8 +243,8 @@ python3 main.py \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitioning/arthritis_STRING_walktrap_clustering/3_arthritis_new_seeds_0.txt' \
-  --out '../cross_validation/validation_rankings/arthritis_STRING_walktrap/3_arthritis_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/RA_STRING_louvain/3_RA_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/RA_STRING_louvain/3_RA_cross_validation_0.out'
 """
 
 # small dataset

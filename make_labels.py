@@ -21,14 +21,14 @@ def main():
         make_labels_for_file()
         return
 
-    # cross_validation/validation_rankings/
+    # cross_validation/rankings/
     directory_path = input("Enter directory path for input rankings: ")
 
-    # cross_validation/validation_output_labels/
+    # cross_validation/labels/
     outfolder_path = input("Enter output folder path: ")
     reverse_flag = int(input("Enter 1 to read file in reverse, 0 otherwise: "))
 
-    # cross_validation/partitioning/
+    # cross_validation/partitions/
     infile_path = input("Enter path to partitionings: ")
     num_folds = input("Enter number of folds: ")
     disease = input("Enter disease: ")
