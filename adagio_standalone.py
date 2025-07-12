@@ -235,7 +235,7 @@ glide-compute \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../data/seed_nodes/rheumatoid_arthritis_drug.txt' 
+  --genelist '../data/seed_nodes/asthma_drug.txt' 
 """
 
 # cross validation
@@ -243,14 +243,14 @@ python3 main.py \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitions/RA_STRING_louvain/3_RA_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/RA_STRING_louvain/3_RA_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/asthma_STRING_louvain/3_asthma_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/asthma_STRING_louvain/3_asthmas_cross_validation_0.out'
 """
 
 # small dataset
 """
 python3 main.py \
-  --network '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/data/networks/STRING_sample_links.tsv' \
-  --genelist '/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/DIAMONDS25/cross_validation/partitioning/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
+  --network '../data/networks/STRING_sample_links.tsv' \
+  --genelist '../cross_validation/partitions/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
   --out d.out 
 """
