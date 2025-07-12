@@ -4,7 +4,7 @@ import os
 def make_labels_for_file():
     ranking_file = open(input("Enter file path for input ranking: "))
 
-    # data/seed_nodes/20_data_drug_schizophrenia.txt
+    # data/seed_nodes/
     seed_file = open(input("Enter file path for seed nodes: "))
     seeds = {line.strip() for line in seed_file}
     outfile = open(input("Enter file path for output file: "), 'w')

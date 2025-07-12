@@ -61,11 +61,11 @@ def get_cluster_rankings(clusters, full_graph, disease_genes):
                         if gene in clusters[i]:
                                 gene_groups[i].append(Gene(name=gene))
 
-
+        """
         # generate cross validation partitions
-        # p(clusters, [[g.name for g in genes] for genes in gene_groups])
-        # return []
-        
+        p(clusters, [[g.name for g in genes] for genes in gene_groups])
+        return []
+        """
         # generate rankings for each cluster
         rankings = []
         for i, cluster in enumerate(clusters):
@@ -211,18 +211,18 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for all nodes (k = 20)
         """
-        graph = EdgeListGarbanzo(network_path, genelist_path)
-        print(len(graph.graph.edges))
-        model = ADAGIO()
-        model.setup(graph.graph)
-        model.set_add_edges_amount(20) # this will add edges to the graph
-        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # graph = EdgeListGarbanzo(network_path, genelist_path)
+        # print(len(graph.graph.edges))
+        # model = ADAGIO()
+        # model.setup(graph.graph)
+        # model.set_add_edges_amount(20) # this will add edges to the graph
+        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
 
         """
         unsupervised clustering - louvain, markov, walktrap
         """
-        # predictions = clustering(network_path, genelist_path, algorithm="walktrap")
+        predictions = clustering(network_path, genelist_path, algorithm="walktrap")
 
         """ 
         supervised clustering
