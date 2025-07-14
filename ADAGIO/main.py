@@ -17,8 +17,8 @@ import multiprocessing
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from partition import *
+
 
 
 parser = argparse.ArgumentParser()
@@ -151,30 +151,19 @@ def supervised_clustering(network_path, genelist_path):
         with multiprocessing.Pool() as pool:
                 clusters = pool.starmap(gse_helper, gse_args)
 
-        # clusters = list(starmap(lambda g, s: greedy_source_expansion(g, source=s), gse_args))
-        # for i, gene in enumerate(disease_genes):
-        #         # can explore changing the cutoff parameter for this function later
-        #         print(i)
-        #         clusters.append(greedy_source_expansion(full_graph, source=gene))
-
         # get jaccard matrix of clusters
-
         n = len(clusters)
         jmat = [[0]*n for _ in range(n)]
-        dick = {}
         for i in range(n - 1):
                 jmat[i][i] = 1
                 for j in range(i + 1, n):
                         jmat[i][j] = jmat[j][i] = jaccard(clusters[i], clusters[j])
-                        num = round(jmat[i][j], 2)
-                        dick[num] = dick.get(num, 0) + 1
 
         for i in range(n):
                 jmat[n - 1][i] = jmat[i][n - 1]
         
+        # merge clusters based on jaccard scores
 
-        print(dick)
-        
         rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
         ranking_dict = {}
 
