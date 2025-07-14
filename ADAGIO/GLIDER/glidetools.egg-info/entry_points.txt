@@ -1,0 +1,2 @@
+[console_scripts]
+glide-compute = glidetools.commands.glide_main:main

@@ -19,6 +19,8 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from partition import *
 
+import pcst_fast
+import numpy as np
 
 
 parser = argparse.ArgumentParser()
@@ -138,40 +140,90 @@ def gse_helper(graph, gene):
         return greedy_source_expansion(graph, source=gene)
         
 def supervised_clustering(network_path, genelist_path):
-        def jaccard(set1, set2):
-                union = set1.union(set2)
-                intersection = set1.intersection(set2)
-                return float(len(intersection))/len(union) if union else 0
+        """
+        make full graph from network path
+        get steiner tree from genelist
+        cluster steiner tree
+                possible more processing to control cluster size/number
+        feed new gene sets to adagio
+        merge rankings
+        """
 
+        disease_genes = set(get_disease_genes(genelist_path))
         full_graph = nx.read_weighted_edgelist(network_path)
-        disease_genes = get_disease_genes(genelist_path)
-   
-        gse_args = [(full_graph, gene) for gene in disease_genes]
+        max_w = max(d['weight'] for _, _, d in full_graph.edges(data=True))
 
-        with multiprocessing.Pool() as pool:
-                clusters = pool.starmap(gse_helper, gse_args)
+        for u, v, data in full_graph.edges(data=True):
+                data['cost'] = max_w-data['weight']+1
 
-        # get jaccard matrix of clusters
-        n = len(clusters)
-        jmat = [[0]*n for _ in range(n)]
-        for i in range(n - 1):
-                jmat[i][i] = 1
-                for j in range(i + 1, n):
-                        jmat[i][j] = jmat[j][i] = jaccard(clusters[i], clusters[j])
-
-        for i in range(n):
-                jmat[n - 1][i] = jmat[i][n - 1]
+        """
+        for comp in nx.connected_components(full_graph):
+                if disease_genes <= comp:                    
+                        G_sub = full_graph.subgraph(comp).copy()
+                        break
         
-        # merge clusters based on jaccard scores
-
-        rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
-        ranking_dict = {}
-
-        for ranking in rankings:
-                for gene, score in ranking:
-                        ranking_dict[gene.name] = max(ranking_dict.get(gene.name, 0), score)
+        steiner = nx.algorithms.approximation.steinertree.steiner_tree(G_sub, disease_genes, weight='cost', method='kou')
+        disease_clusters = nx.community.louvain_communities(steiner)
+        print(len(disease_clusters))
+        return []
+        """
         
-        return sorted([[Gene(x), ranking_dict[x]] for x in ranking_dict], key=lambda x: -x[1])
+        idx = {n:i for i,n in enumerate(full_graph.nodes())}
+        edges = np.fromiter((i for uv in full_graph.edges()
+                        for i in (idx[uv[0]], idx[uv[1]])),
+                        dtype=np.int32).reshape(-1,2)
+
+        costs = np.fromiter((full_graph[u][v]['cost'] for u,v in full_graph.edges()), dtype=np.float64)
+        prizes = np.zeros(len(idx), dtype=np.float64)
+        prizes[[idx[g] for g in disease_genes]] = 1e6      # force inclusion
+
+        
+        nodes_kept, edges_kept = pcst_fast.pcst_fast(
+                edges,      # numpy int32 [:,2]
+                prizes,     # numpy float64 [:]
+                costs,      # numpy float64 [:]
+                -1,               # root index (-1 = unrooted)
+                1,                # num_clusters
+                'strong',                # pruning: 0=none, 1=simple, 2=strong
+                0)                # verbosity (0 = silent)
+
+        edges = edges.astype(np.int64, copy=False)
+        # print("edges_kept:", edges_kept[:10], type(edges_kept), edges_kept.dtype if hasattr(edges_kept, 'dtype') else None)
+
+        edge_pairs = edges[edges_kept] 
+        inv_idx = {i: n for n, i in idx.items()}
+
+        steiner_edges = [(inv_idx[u], inv_idx[v]) for u, v in edge_pairs]
+        # print("First steiner_edges:", steiner_edges[:5])
+
+        steiner = full_graph.edge_subgraph(steiner_edges).copy()
+        print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
+        disease_clusters = nx.community.louvain_communities(steiner)
+        return []
+        """
+        # add edges and neighbors to disease gene graph if they connect two 
+        # disease genes
+        edges = open(network_path)
+        disease_neighbors = set()
+        for edge in edges:
+                gene1, gene2, score = edge.split("\t")
+
+                if gene1 in disease_genes and gene2 in disease_genes:
+                        steiner.add_edge(gene1, gene2, weight=score)
+
+                elif gene1 in disease_genes:
+                        if gene2 in disease_neighbors:
+                                steiner.add_edge(gene1, gene2, weight=score)
+
+                        disease_neighbors.add(gene2)
+                        
+                elif gene2 in disease_genes:
+                        if gene1 in disease_neighbors:
+                                steiner.add_edge(gene1, gene2, weight=score)
+                                
+                        disease_neighbors.add(gene1)
+
+        """
 
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
@@ -211,12 +263,12 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         unsupervised clustering - louvain, markov, walktrap
         """
-        predictions = clustering(network_path, genelist_path, algorithm="louvain")
+        # predictions = clustering(network_path, genelist_path, algorithm="louvain")
 
         """ 
         supervised clustering
         """
-        # predictions = supervised_clustering(network_path, genelist_path)
+        predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
@@ -231,3 +283,44 @@ if __name__ == "__main__":
         args = parser.parse_args()
         main(args.network, args.genelist, args.out)
         
+
+
+
+
+"""
+def graveyard():
+        def jaccard(set1, set2):
+                union = set1.union(set2)
+                intersection = set1.intersection(set2)
+                return float(len(intersection))/len(union) if union else 0
+
+        full_graph = nx.read_weighted_edgelist(network_path)
+        disease_genes = get_disease_genes(genelist_path)
+   
+        gse_args = [(full_graph, gene) for gene in disease_genes]
+
+        with multiprocessing.Pool() as pool:
+                clusters = pool.starmap(gse_helper, gse_args)
+
+        # get jaccard matrix of clusters
+        n = len(clusters)
+        jmat = [[0]*n for _ in range(n)]
+        for i in range(n - 1):
+                jmat[i][i] = 1
+                for j in range(i + 1, n):
+                        jmat[i][j] = jmat[j][i] = jaccard(clusters[i], clusters[j])
+
+        for i in range(n):
+                jmat[n - 1][i] = jmat[i][n - 1]
+        
+        # merge clusters based on jaccard scores
+
+        rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
+        ranking_dict = {}
+
+        for ranking in rankings:
+                for gene, score in ranking:
+                        ranking_dict[gene.name] = max(ranking_dict.get(gene.name, 0), score)
+        
+        return sorted([[Gene(x), ranking_dict[x]] for x in ranking_dict], key=lambda x: -x[1])
+"""

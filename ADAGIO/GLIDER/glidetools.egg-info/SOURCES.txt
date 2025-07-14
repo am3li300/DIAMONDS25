@@ -1,0 +1,8 @@
+README.md
+setup.py
+glidetools.egg-info/PKG-INFO
+glidetools.egg-info/SOURCES.txt
+glidetools.egg-info/dependency_links.txt
+glidetools.egg-info/entry_points.txt
+glidetools.egg-info/requires.txt
+glidetools.egg-info/top_level.txt
