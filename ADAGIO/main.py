@@ -193,7 +193,10 @@ def supervised_clustering(network_path, genelist_path):
 
         steiner_edges = [(inv_idx[u], inv_idx[v]) for u, v in edge_pairs]
         steiner = full_graph.edge_subgraph(steiner_edges).copy()
+        
         print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
+        assert disease_genes <= set(steiner.nodes), "Some disease genes not in the steiner tree!"
+
         disease_clusters = nx.community.louvain_communities(steiner)
         print(len(disease_clusters))
         return []
