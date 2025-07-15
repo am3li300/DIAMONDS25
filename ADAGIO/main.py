@@ -188,21 +188,18 @@ def supervised_clustering(network_path, genelist_path):
                 0)                # verbosity (0 = silent)
 
         edges = edges.astype(np.int64, copy=False)
-        # print("edges_kept:", edges_kept[:10], type(edges_kept), edges_kept.dtype if hasattr(edges_kept, 'dtype') else None)
-
         edge_pairs = edges[edges_kept] 
         inv_idx = {i: n for n, i in idx.items()}
 
         steiner_edges = [(inv_idx[u], inv_idx[v]) for u, v in edge_pairs]
-        # print("First steiner_edges:", steiner_edges[:5])
-
         steiner = full_graph.edge_subgraph(steiner_edges).copy()
         print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
         disease_clusters = nx.community.louvain_communities(steiner)
+        print(len(disease_clusters))
         return []
-        """
         # add edges and neighbors to disease gene graph if they connect two 
         # disease genes
+        """
         edges = open(network_path)
         disease_neighbors = set()
         for edge in edges:
@@ -222,8 +219,8 @@ def supervised_clustering(network_path, genelist_path):
                                 steiner.add_edge(gene1, gene2, weight=score)
                                 
                         disease_neighbors.add(gene1)
-
         """
+        
 
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
