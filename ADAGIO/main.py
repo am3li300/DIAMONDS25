@@ -199,9 +199,19 @@ def supervised_clustering(network_path, genelist_path):
 
         disease_clusters = nx.community.louvain_communities(steiner)
         print(len(disease_clusters))
-        return []
+
         # add edges and neighbors to disease gene graph if they connect two 
         # disease genes
+        
+        disease_neighbors = set()
+        for gene in disease_genes:
+                for neighbor in full_graph.neighbors(gene):
+                        if neighbor not in disease_genes:
+                                disease_neighbors.add(neighbor)
+
+                        else:
+                                steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
+
         """
         edges = open(network_path)
         disease_neighbors = set()
