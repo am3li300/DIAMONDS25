@@ -138,7 +138,10 @@ def clustering(network_path, genelist_path, algorithm="louvain"):
 
 def gse_helper(graph, gene):
         return greedy_source_expansion(graph, source=gene)
-        
+
+def run_adagio(disease_set, graph):
+        return list(model.prioritize(disease_set, graph))
+
 def supervised_clustering(network_path, genelist_path):
         """
         make full graph from network path
@@ -193,47 +196,30 @@ def supervised_clustering(network_path, genelist_path):
 
         steiner_edges = [(inv_idx[u], inv_idx[v]) for u, v in edge_pairs]
         steiner = full_graph.edge_subgraph(steiner_edges).copy()
-        
         print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
         assert disease_genes <= set(steiner.nodes), "Some disease genes not in the steiner tree!"
 
-        disease_clusters = nx.community.louvain_communities(steiner)
-        print(len(disease_clusters))
-
-        # add edges and neighbors to disease gene graph if they connect two 
-        # disease genes
-        
-        disease_neighbors = set()
+        # add edges between disease genes
         for gene in disease_genes:
                 for neighbor in full_graph.neighbors(gene):
-                        if neighbor not in disease_genes:
-                                disease_neighbors.add(neighbor)
-
-                        else:
+                        if neighbor in disease_genes:
                                 steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
+                                        
+        disease_clusters = nx.community.louvain_communities(steiner)
+        model = ADAGIO()
+        model.setup(full_graph)
+        model.set_add_edges_amount(20)
+        adagio_args = [(cluster, full_graph, model) for cluster in disease_clusters]
+        with multiprocessing.Pool() as pool:
+                rankings = pool.starmap(run_adagio, adagio_args)
 
-        """
-        edges = open(network_path)
-        disease_neighbors = set()
-        for edge in edges:
-                gene1, gene2, score = edge.split("\t")
+        max_rankings = {}
 
-                if gene1 in disease_genes and gene2 in disease_genes:
-                        steiner.add_edge(gene1, gene2, weight=score)
+        for ranking in rankings:
+               for gene, score in ranking:
+                        max_rankings[gene] = max(score, max_rankings.get(gene, 0))
 
-                elif gene1 in disease_genes:
-                        if gene2 in disease_neighbors:
-                                steiner.add_edge(gene1, gene2, weight=score)
-
-                        disease_neighbors.add(gene2)
-                        
-                elif gene2 in disease_genes:
-                        if gene1 in disease_neighbors:
-                                steiner.add_edge(gene1, gene2, weight=score)
-                                
-                        disease_neighbors.add(gene1)
-        """
-        
+        return sorted(list(max_rankings.items()), key=lambda x: -x[1])
 
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
