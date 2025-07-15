@@ -21,6 +21,7 @@ from partition import *
 
 import pcst_fast
 import numpy as np
+from joblib import Parallel, delayed
 
 
 parser = argparse.ArgumentParser()
@@ -140,7 +141,10 @@ def gse_helper(graph, gene):
         return greedy_source_expansion(graph, source=gene)
 
 def run_adagio(disease_set, graph):
-        return list(model.prioritize(disease_set, graph))
+        model = ADAGIO()
+        model.setup(graph)
+        model.set_add_edges_amount(20)
+        return list(model.prioritize([Gene(g) for g in disease_set], graph))
 
 def supervised_clustering(network_path, genelist_path):
         """
@@ -154,22 +158,10 @@ def supervised_clustering(network_path, genelist_path):
 
         disease_genes = set(get_disease_genes(genelist_path))
         full_graph = nx.read_weighted_edgelist(network_path)
-        max_w = max(d['weight'] for _, _, d in full_graph.edges(data=True))
 
-        for u, v, data in full_graph.edges(data=True):
-                data['cost'] = max_w-data['weight']+1
-
-        """
-        for comp in nx.connected_components(full_graph):
-                if disease_genes <= comp:                    
-                        G_sub = full_graph.subgraph(comp).copy()
-                        break
-        
-        steiner = nx.algorithms.approximation.steinertree.steiner_tree(G_sub, disease_genes, weight='cost', method='kou')
-        disease_clusters = nx.community.louvain_communities(steiner)
-        print(len(disease_clusters))
-        return []
-        """
+        w = nx.get_edge_attributes(full_graph, 'weight')
+        max_w = max(w.values())
+        nx.set_edge_attributes(full_graph, {e: max_w - wt + 1 for e, wt in w.items()}, name='cost')
         
         idx = {n:i for i,n in enumerate(full_graph.nodes())}
         edges = np.fromiter((i for uv in full_graph.edges()
@@ -206,12 +198,28 @@ def supervised_clustering(network_path, genelist_path):
                                 steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
                                         
         disease_clusters = nx.community.louvain_communities(steiner)
-        model = ADAGIO()
-        model.setup(full_graph)
-        model.set_add_edges_amount(20)
-        adagio_args = [(cluster, full_graph, model) for cluster in disease_clusters]
+
+        model_all = ADAGIO()
+        model_all.setup(steiner)
+        model_all.set_add_edges_amount(20)
+
+        # score clusters in parallel
+        def score_cluster(cluster):
+                seeds = [Gene(name=g) for g in cluster if g in disease_genes]
+                if not seeds:
+                        return []
+
+                return list(model_all.prioritize(seeds, full_graph))
+
+        rankings = Parallel(n_jobs=8)(
+        delayed(score_cluster)(cl) for cl in disease_clusters
+        )
+
+        """
+        adagio_args = [(cluster, full_graph) for cluster in disease_clusters]
         with multiprocessing.Pool() as pool:
                 rankings = pool.starmap(run_adagio, adagio_args)
+        """
 
         max_rankings = {}
 
