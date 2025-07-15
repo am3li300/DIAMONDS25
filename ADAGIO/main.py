@@ -200,7 +200,7 @@ def supervised_clustering(network_path, genelist_path):
         disease_clusters = nx.community.louvain_communities(steiner)
 
         model_all = ADAGIO()
-        model_all.setup(steiner)
+        model_all.setup(full_graph)
         model_all.set_add_edges_amount(20)
 
         # score clusters in parallel
