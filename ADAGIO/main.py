@@ -188,7 +188,7 @@ def supervised_clustering(network_path, genelist_path):
 
         steiner_edges = [(inv_idx[u], inv_idx[v]) for u, v in edge_pairs]
         steiner = full_graph.edge_subgraph(steiner_edges).copy()
-        print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
+        # print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
         assert disease_genes <= set(steiner.nodes), "Some disease genes not in the steiner tree!"
 
         # add edges between disease genes
@@ -199,21 +199,38 @@ def supervised_clustering(network_path, genelist_path):
                                         
         disease_clusters = nx.community.louvain_communities(steiner)
 
+        set_up_start = time()
         model_all = ADAGIO()
         model_all.setup(full_graph)
         model_all.set_add_edges_amount(20)
+        print("Total set up time:", time()-set_up_start)
 
+        """
         # score clusters in parallel
         def score_cluster(cluster):
+                s = time()
                 seeds = [Gene(name=g) for g in cluster if g in disease_genes]
                 if not seeds:
                         return []
+                
+                res = list(model_all.prioritize(seeds, full_graph))
+                print("Time to finish run:", time()-s)
+                return res
 
-                return list(model_all.prioritize(seeds, full_graph))
-
-        rankings = Parallel(n_jobs=8)(
+        rankings = Parallel(n_jobs=5)(
         delayed(score_cluster)(cl) for cl in disease_clusters
         )
+        """
+        rankings = []
+        for cluster in disease_clusters:
+                s = time()
+                seeds = [Gene(name=g) for g in cluster if g in disease_genes]
+                if not seeds:
+                        continue
+
+                res = list(model_all.prioritize(seeds, full_graph))
+                print("Time to finish run:", time()-s)
+                rankings.append(res)
 
         """
         adagio_args = [(cluster, full_graph) for cluster in disease_clusters]
