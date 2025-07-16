@@ -25,7 +25,7 @@ class RandomWalkWithRestart(Feta):
             graph,
             alpha=self._desc.hyper_params["alpha"],
             personalization=personalization,
-            max_iter=10
+            max_iter=10,
             tol=0.001)
 
         data_set = set()
