@@ -205,7 +205,7 @@ def supervised_clustering(network_path, genelist_path):
         model_all.set_add_edges_amount(20)
         print("Total set up time:", time()-set_up_start)
 
-        """
+        
         # score clusters in parallel
         def score_cluster(cluster):
                 s = time()
@@ -217,7 +217,7 @@ def supervised_clustering(network_path, genelist_path):
                 print("Time to finish run:", time()-s)
                 return res
 
-        rankings = Parallel(n_jobs=5)(
+        rankings = Parallel(n_jobs=2)(
         delayed(score_cluster)(cl) for cl in disease_clusters
         )
         """
@@ -232,8 +232,9 @@ def supervised_clustering(network_path, genelist_path):
                 res = list(model_all.prioritize(seeds, full_graph))
                 print("Time to finish run:", time()-s)
                 rankings.append(res)
-
+        
         print("Time for all runs:", time()-total)
+        """
         """
         adagio_args = [(cluster, full_graph) for cluster in disease_clusters]
         with multiprocessing.Pool() as pool:
