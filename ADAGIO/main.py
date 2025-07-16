@@ -23,6 +23,8 @@ import pcst_fast
 import numpy as np
 from joblib import Parallel, delayed
 
+import matplotlib.pyplot as plt
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -197,8 +199,8 @@ def supervised_clustering(network_path, genelist_path):
                         if neighbor in disease_genes:
                                 steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
                                         
-        disease_clusters = nx.community.louvain_communities(steiner)
-
+        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2)
+        print("num of clusters:", len(disease_clusters))
         set_up_start = time()
         model_all = ADAGIO()
         model_all.setup(full_graph)
@@ -212,8 +214,8 @@ def supervised_clustering(network_path, genelist_path):
                 seeds = [Gene(name=g) for g in cluster if g in disease_genes]
                 if not seeds:
                         return []
-                
-                res = list(model_all.prioritize(seeds, full_graph))
+                print("number of seeds:", len(seeds))
+                res = sorted(list(model_all.prioritize(seeds, full_graph)), key=lambda x:-x[1])
                 print("Time to finish run:", time()-s)
                 return res
 
@@ -235,17 +237,19 @@ def supervised_clustering(network_path, genelist_path):
         
         print("Time for all runs:", time()-total)
         """
-        """
-        adagio_args = [(cluster, full_graph) for cluster in disease_clusters]
-        with multiprocessing.Pool() as pool:
-                rankings = pool.starmap(run_adagio, adagio_args)
-        """
 
-        max_rankings = {}
+        max_score = max(ranking[0][1] for ranking in rankings)
+
+        for ranking in rankings:
+                for i in range(len(ranking)):
+                        ranking[i][1] = pow(ranking[i][1] / max_score, 4)
+
+        from collections import defaultdict
+        max_rankings = defaultdict(int)
 
         for ranking in rankings:
                for gene, score in ranking:
-                        max_rankings[gene] = max(score, max_rankings.get(gene, 0))
+                        max_rankings[gene] += score  # max(score, max_rankings.get(gene, 0))
 
         return sorted(list(max_rankings.items()), key=lambda x: -x[1])
 
