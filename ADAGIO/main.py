@@ -222,6 +222,7 @@ def supervised_clustering(network_path, genelist_path):
         )
         """
         rankings = []
+        total = time()
         for cluster in disease_clusters:
                 s = time()
                 seeds = [Gene(name=g) for g in cluster if g in disease_genes]
@@ -232,6 +233,7 @@ def supervised_clustering(network_path, genelist_path):
                 print("Time to finish run:", time()-s)
                 rankings.append(res)
 
+        print("Time for all runs:", time()-total)
         """
         adagio_args = [(cluster, full_graph) for cluster in disease_clusters]
         with multiprocessing.Pool() as pool:
