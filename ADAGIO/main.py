@@ -40,7 +40,9 @@ def get_disease_genes(genelist_path):
 
         return disease_genes
 
-def merge_rankings(rankings):
+############################ Clustering ###############################
+
+def merge_cluster_rankings(rankings):
         heap = []
         for i, ranking in enumerate(rankings):
                 if ranking:
@@ -136,31 +138,12 @@ def clustering(network_path, genelist_path, algorithm="louvain"):
 
         disease_genes = get_disease_genes(genelist_path)
         rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
-        return merge_rankings(rankings)
+        return merge_cluster_rankings(rankings)
 
 
-def gse_helper(graph, gene):
-        return greedy_source_expansion(graph, source=gene)
+####################### Supervised Clustering ###############################
 
-def run_adagio(disease_set, graph):
-        model = ADAGIO()
-        model.setup(graph)
-        model.set_add_edges_amount(20)
-        return list(model.prioritize([Gene(g) for g in disease_set], graph))
-
-def supervised_clustering(network_path, genelist_path):
-        """
-        make full graph from network path
-        get steiner tree from genelist
-        cluster steiner tree
-                possible more processing to control cluster size/number
-        feed new gene sets to adagio
-        merge rankings
-        """
-
-        disease_genes = set(get_disease_genes(genelist_path))
-        full_graph = nx.read_weighted_edgelist(network_path)
-
+def build_steiner_tree(full_graph, disease_genes):
         w = nx.get_edge_attributes(full_graph, 'weight')
         max_w = max(w.values())
         nx.set_edge_attributes(full_graph, {e: max_w - wt + 1 for e, wt in w.items()}, name='cost')
@@ -189,25 +172,16 @@ def supervised_clustering(network_path, genelist_path):
         inv_idx = {i: n for n, i in idx.items()}
 
         steiner_edges = [(inv_idx[u], inv_idx[v]) for u, v in edge_pairs]
-        steiner = full_graph.edge_subgraph(steiner_edges).copy()
-        # print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
-        assert disease_genes <= set(steiner.nodes), "Some disease genes not in the steiner tree!"
 
-        # add edges between disease genes
-        for gene in disease_genes:
-                for neighbor in full_graph.neighbors(gene):
-                        if neighbor in disease_genes:
-                                steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
-                                        
-        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
-        print("num of clusters:", len(disease_clusters))
+        return full_graph.edge_subgraph(steiner_edges).copy()
 
+def run_adagio(full_graph, disease_genes, disease_clusters):
         set_up_start = time()
         model_all = ADAGIO()
         model_all.setup(full_graph) # change to steiner for quick testing
         model_all.set_add_edges_amount(20)
 
-        print("Total set up time:", time()-set_up_start)
+        print("Set up time:", time()-set_up_start)
 
         # score clusters in parallel
         def score_cluster(cluster):
@@ -215,30 +189,14 @@ def supervised_clustering(network_path, genelist_path):
                 seeds = [Gene(name=g) for g in cluster if g in disease_genes]
                 if not seeds:
                         return []
-                print("number of seeds:", len(seeds))
-                res = sorted(list(model_all.prioritize(seeds, full_graph)), key=lambda x:-x[1])
-                print("Time to finish run:", time()-s)
-                return res
+                print("Number of seeds:", len(seeds))
+                cluster_ranking = sorted(list(model_all.prioritize(seeds, full_graph)), key=lambda x:-x[1])
+                print("Time of one run:", time()-s)
+                return cluster_ranking
 
-        rankings = Parallel(n_jobs=2)(
-        delayed(score_cluster)(cl) for cl in disease_clusters
-        )
-        """
-        rankings = []
-        total = time()
-        for cluster in disease_clusters:
-                s = time()
-                seeds = [Gene(name=g) for g in cluster if g in disease_genes]
-                if not seeds:
-                        continue
+        return Parallel(n_jobs=2)(delayed(score_cluster)(cl) for cl in disease_clusters)
 
-                res = list(model_all.prioritize(seeds, full_graph))
-                print("Time to finish run:", time()-s)
-                rankings.append(res)
-        
-        print("Time for all runs:", time()-total)
-        """
-
+def merge_supervised_cluster_rankings(rankings):
         max_score = max(ranking[0][1] for ranking in rankings)
 
         def assign_label(score, threshold=0.003):
@@ -267,6 +225,38 @@ def supervised_clustering(network_path, genelist_path):
         
         return sorted(list(max_rankings.items()), key=lambda x: -x[1])
         """
+
+def supervised_clustering(network_path, genelist_path):
+        disease_genes = set(get_disease_genes(genelist_path))
+        full_graph = nx.read_weighted_edgelist(network_path)
+
+       
+        steiner = build_steiner_tree(full_graph, disease_genes)
+        assert disease_genes <= set(steiner.nodes), "Some disease genes not in the steiner tree!"
+        # print(nx.number_connected_components(steiner), len(steiner.edges), len(steiner.nodes))
+
+        # add edges between disease genes
+        for gene in disease_genes:
+                for neighbor in full_graph.neighbors(gene):
+                        if neighbor in disease_genes:
+                                steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
+                                        
+        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
+        print("Number of clusters:", len(disease_clusters))
+
+        rankings = run_adagio(full_graph, disease_genes, disease_clusters)
+
+        disease = input("Enter disease: ")
+        for i, ranking in enumerate(rankings):
+                with open(f"../output/disease_cluster/{disease}_cluster_{i}.txt", "w") as fout:
+                        for gene, score in ranking:
+                                fout.write(f"{gene.name}\t{score}\n")
+
+
+        return []
+
+        return merge_supervised_cluster_rankings(rankings)
+        
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         start = time()
@@ -365,4 +355,22 @@ def graveyard():
                         ranking_dict[gene.name] = max(ranking_dict.get(gene.name, 0), score)
         
         return sorted([[Gene(x), ranking_dict[x]] for x in ranking_dict], key=lambda x: -x[1])
+
+
+        rankings = []
+        total = time()
+        for cluster in disease_clusters:
+                s = time()
+                seeds = [Gene(name=g) for g in cluster if g in disease_genes]
+                if not seeds:
+                        continue
+
+                res = list(model_all.prioritize(seeds, full_graph))
+                print("Time to finish run:", time()-s)
+                rankings.append(res)
+        
+        print("Time for all runs:", time()-total)
+
+def gse_helper(graph, gene):
+        return greedy_source_expansion(graph, source=gene)
 """
