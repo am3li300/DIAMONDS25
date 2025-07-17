@@ -144,6 +144,18 @@ def compute_degree_vec(edgelist):
 
 ###################################################################################################################################################
 
+# Choose Scoring Method
+def score_pair(args):
+    i, j, pairwise_dist, local_metric, edgedict, ndict, params_, method, alpha, beta, delta, p_delta = args
+    local_score = local_metric(i, j, edgedict, ndict, params_)
+    dsed_dist   = pairwise_dist[i, j]
+    if method == "sum":
+        glide_score = (np.exp(alpha / (1 + beta * dsed_dist)) * local_score
+                    + delta * 1 / dsed_dist)
+    elif method == "prod":
+        glide_score = (p_delta + local_score) / dsed_dist
+    return (i, j, glide_score)
+
 def glide_predict_links(edgelist, X, params={}):
     """Predicts the most likely links in a graph given an embedding X
     of a graph.
@@ -172,18 +184,6 @@ def glide_predict_links(edgelist, X, params={}):
     # Embedding
     pairwise_dist = spatial.squareform(spatial.pdist(X))
     N             = X.shape[0]
-
-    # Choose Scoring Method
-    def score_pair(args):
-        i, j, pairwise_dist, local_metric, edgedict, ndict, params_, method, alpha, beta, delta, p_delta = args
-        local_score = local_metric(i, j, edgedict, ndict, params_)
-        dsed_dist   = pairwise_dist[i, j]
-        if method == "sum":
-            glide_score = (np.exp(alpha / (1 + beta * dsed_dist)) * local_score
-                        + delta * 1 / dsed_dist)
-        elif method == "prod":
-            glide_score = (p_delta + local_score) / dsed_dist
-        return (i, j, glide_score)
     
     if "method" not in params or params["method"] == "sum":
         method        = "sum"
@@ -213,16 +213,16 @@ def glide_predict_links(edgelist, X, params={}):
     else:
         raise Exception("[x] The local scoring metric is not available.")
 
-
+    """
     ij_pairs = list(combinations(range(N), 2))
     extra_args = (pairwise_dist, local_metric, edgedict, ndict, params_, method, alpha, beta, delta, p_delta)
 
     results = Parallel(n_jobs=-1, prefer="threads")( # processes if threads doesn't work
         delayed(score_pair)((i, j) + extra_args) for (i, j) in ij_pairs
     )
-
-    gmat = np.zeros((N, N))
     """
+    gmat = np.zeros((N, N))
+    
     for i in range(N):
         for j in range(i):
             local_score = local_metric(i, j, edgedict, ndict, params_)
@@ -234,11 +234,11 @@ def glide_predict_links(edgelist, X, params={}):
                 glide_score = (p_delta + local_metric(i, j, edgedict, ndict, params_)) / dsed_dist
             gmat[i, j] = glide_score
             gmat[j, i] = glide_score
+    
     """
-
     for i, j, glide_score in results:
         gmat[i, j] = glide_score
         gmat[j, i] = glide_score
-
+    """
     return gmat    
     

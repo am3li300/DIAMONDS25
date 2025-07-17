@@ -24,6 +24,8 @@ import numpy as np
 from joblib import Parallel, delayed
 
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter1d
+from scipy.signal import argrelextrema
 
 
 parser = argparse.ArgumentParser()
@@ -138,16 +140,6 @@ def clustering(network_path, genelist_path, algorithm="louvain"):
         rankings = get_cluster_rankings(clusters, full_graph, disease_genes)
         return merge_rankings(rankings)
 
-
-def gse_helper(graph, gene):
-        return greedy_source_expansion(graph, source=gene)
-
-def run_adagio(disease_set, graph):
-        model = ADAGIO()
-        model.setup(graph)
-        model.set_add_edges_amount(20)
-        return list(model.prioritize([Gene(g) for g in disease_set], graph))
-
 def supervised_clustering(network_path, genelist_path):
         """
         make full graph from network path
@@ -244,6 +236,25 @@ def supervised_clustering(network_path, genelist_path):
         def assign_label(score, threshold=0.003):
                 return score / max_score if score >= threshold else score
 
+        def get_threshold(ranking):
+                """
+                incomplete
+                """
+                # Compute and smooth the histogram
+                floats = [item[1] for item in ranking if item[1] < 1]
+                counts, bin_edges = np.histogram(floats, bins='auto')
+                smoothed_counts = gaussian_filter1d(counts, sigma=2)  # sigma controls smoothing
+
+                # Find local minima
+                minima_indices = argrelextrema(smoothed_counts, np.less)[0]
+                
+                
+                return 0
+
+        
+        # threshold = sum(get_threshold(ranking) for ranking in rankings) / len(rankings)
+        # print("Threshold:", threshold)
+
         final_scores = {}
         for ranking in rankings:
                 for gene, score in ranking:
@@ -330,6 +341,9 @@ if __name__ == "__main__":
 
 
 """
+def gse_helper(graph, gene):
+        return greedy_source_expansion(graph, source=gene)
+
 def graveyard():
         def jaccard(set1, set2):
                 union = set1.union(set2)
