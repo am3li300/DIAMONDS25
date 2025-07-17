@@ -241,6 +241,19 @@ def supervised_clustering(network_path, genelist_path):
 
         max_score = max(ranking[0][1] for ranking in rankings)
 
+        def assign_label(score, threshold=0.003):
+                return score / max_score if score >= threshold else score
+
+        final_scores = {}
+        for ranking in rankings:
+                for gene, score in ranking:
+                        final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, 0.003)  # find general or adaptive threshold for other diseases
+
+        return sorted(list(final_scores.items()), key=lambda x: -x[1])
+
+        """
+        max_score = max(ranking[0][1] for ranking in rankings)
+
         for ranking in rankings:
                 for i in range(len(ranking)):
                         ranking[i] = (ranking[i][0], pow(ranking[i][1] / max_score, 4))
@@ -251,9 +264,9 @@ def supervised_clustering(network_path, genelist_path):
         for ranking in rankings:
                for gene, score in ranking:
                         max_rankings[gene] += score 
-
+        
         return sorted(list(max_rankings.items()), key=lambda x: -x[1])
-
+        """
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         start = time()
