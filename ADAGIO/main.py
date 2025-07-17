@@ -199,15 +199,16 @@ def supervised_clustering(network_path, genelist_path):
                         if neighbor in disease_genes:
                                 steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
                                         
-        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2)
+        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
         print("num of clusters:", len(disease_clusters))
+
         set_up_start = time()
         model_all = ADAGIO()
-        model_all.setup(full_graph)
+        model_all.setup(full_graph) # change to steiner for quick testing
         model_all.set_add_edges_amount(20)
+
         print("Total set up time:", time()-set_up_start)
 
-        
         # score clusters in parallel
         def score_cluster(cluster):
                 s = time()
@@ -242,14 +243,14 @@ def supervised_clustering(network_path, genelist_path):
 
         for ranking in rankings:
                 for i in range(len(ranking)):
-                        ranking[i][1] = pow(ranking[i][1] / max_score, 4)
+                        ranking[i] = (ranking[i][0], pow(ranking[i][1] / max_score, 4))
 
         from collections import defaultdict
         max_rankings = defaultdict(int)
 
         for ranking in rankings:
                for gene, score in ranking:
-                        max_rankings[gene] += score  # max(score, max_rankings.get(gene, 0))
+                        max_rankings[gene] += score 
 
         return sorted(list(max_rankings.items()), key=lambda x: -x[1])
 
