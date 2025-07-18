@@ -9,10 +9,10 @@ from heapq import heapify, heappush, heappop
 import networkx as nx
 from scipy.sparse import csr_matrix
 import markov_clustering as mc
-from local_community_detection import greedy_source_expansion
+# from local_community_detection import greedy_source_expansion
 
 import igraph as ig
-import multiprocessing
+# import multiprocessing
 
 import sys
 import os
@@ -198,13 +198,13 @@ def run_adagio(full_graph, disease_genes, disease_clusters):
 
         return Parallel(n_jobs=2)(delayed(score_cluster)(cl) for cl in disease_clusters)
 
-def merge_supervised_cluster_rankings(rankings):
+def merge_supervised_cluster_rankings(rankings, disease_genes):
         max_score = max(ranking[0][1] for ranking in rankings)
 
         def assign_label(score, threshold):
                 return score / max_score if score >= threshold else score
 
-        def get_threshold(ranking, min_n=20, fallback_q=75, visualize=True):
+        def get_threshold(ranking, min_n=20, fallback_q=75, visualize=False):
                 """
                 Minimal but safer rewrite of the original valley-finding heuristic.
 
@@ -215,7 +215,7 @@ def merge_supervised_cluster_rankings(rankings):
                 fallback_q : float   # percentile to return when valley search fails
                 """
                 # --- 0. collect scores and exit early if we have nothing ---
-                scores = np.asarray([s for _, s in ranking if s <= 1.0], dtype=float)
+                scores = np.asarray([s for gene, s in ranking if 0 < s <= 1.0 and gene not in disease_genes], dtype=float)
                 scores = scores[np.isfinite(scores)]
                 if scores.size == 0:
                         return 0
@@ -226,11 +226,10 @@ def merge_supervised_cluster_rankings(rankings):
 
                 # --- 2. histogram & smoothing (unchanged except for adaptive sigma) ---
                 counts, bin_edges = np.histogram(scores, bins="auto")
-                if counts.size < 3:                         # need at least 3 bins
-                        return float(np.percentile(scores, fallback_q))
+                log_counts = np.where(counts > 0, np.log10(counts), np.nan)
 
-                sigma = max(1, counts.size // 50)           # light adaptive smoothing
-                smoothed = gaussian_filter1d(counts, sigma=sigma)
+                sigma = max(1, log_counts.size // 50)           # light adaptive smoothing
+                smoothed = gaussian_filter1d(log_counts, sigma=sigma)
 
                 minima = argrelextrema(smoothed, np.less)[0]
                 maxima = argrelextrema(smoothed, np.greater)[0]
@@ -238,16 +237,16 @@ def merge_supervised_cluster_rankings(rankings):
                 if visualize:
                         bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
                         plt.figure(figsize=(8, 5))
-                        plt.bar(bin_centers, counts, width=np.diff(bin_edges), alpha=0.4, label="Histogram")
+                        plt.bar(bin_centers, log_counts, width=np.diff(bin_edges), alpha=0.4, label="Histogram")
                         plt.plot(bin_centers, smoothed, label="Smoothed")
                         plt.scatter(bin_centers[minima], smoothed[minima], color='red', label='Minima', zorder=3)
                         plt.scatter(bin_centers[maxima], smoothed[maxima], color='green', label='Maxima', zorder=3)
                         plt.xlabel("Score")
-                        plt.ylabel("Frequency")
+                        plt.ylabel("Frequency (log scale)")
                         plt.title("Histogram + Smoothed Curve (for valley detection)")
                         plt.legend()
                         plt.show()
-                        
+
                 # --- 3. find valley with widest *score-space* span ---
                 widest_span = 0.0
                 best_min = None
@@ -314,7 +313,6 @@ def supervised_clustering(network_path, genelist_path):
                                         
         disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
         print("Number of clusters:", len(disease_clusters))
-
         rankings = run_adagio(full_graph, disease_genes, disease_clusters) # change to steiner for quick testing
         """
         disease = input("Enter disease: ")
@@ -324,7 +322,7 @@ def supervised_clustering(network_path, genelist_path):
                                 fout.write(f"{gene.name}\t{score}\n")
 
         """
-        return merge_supervised_cluster_rankings(rankings)
+        return merge_supervised_cluster_rankings(rankings, disease_genes)
         
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
