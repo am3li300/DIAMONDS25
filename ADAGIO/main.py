@@ -205,182 +205,42 @@ def merge_supervised_cluster_rankings(rankings):
                 return score / max_score if score >= threshold else score
 
         def get_threshold(ranking):
-                """
-                Compute a score threshold from a 2D list-like `ranking` whose elements are [Gene(), float_score].
-                Steps:
-                1. Extract scores < SCORE_CUTOFF.
-                2. Histogram + Gaussian smooth.
-                3. Find local maxima & minima in smoothed counts.
-                4. Build all valleys (max->min->max triplets).
-                5. Select widest valley on score axis.
-                6. Derive several representative cut values; choose one via heuristic (sharp valley -> argmin, else midpoint).
+                # ranking: list of (gene, score) pairs
+                floats = [item[1] for item in ranking if item[1] <= 1]
 
-                Returns
-                -------
-                dict with keys (some may be None if insufficient data):
-                        scores              : np.ndarray of used scores
-                        bin_edges            : np.ndarray
-                        bin_centers          : np.ndarray
-                        score_counts         : np.ndarray (raw histogram)
-                        smoothed_counts      : np.ndarray (smoothed histogram)
-                        valleys              : list of valley dicts (see below)
-                        widest_valley        : valley dict for widest or None
-                        cut_value            : chosen numeric threshold or None
+                # 1. Auto-binned histogram of scores
+                counts, bin_edges = np.histogram(floats, bins='auto')
 
-                Each valley dict contains:
-                        min_bin, left_max_bin, right_max_bin
-                        width, depth, flatness
-                        min_count, left_max_count, right_max_count
-                        left_edge, right_edge
-                        min_bin_center, valley_midpoint, argmin_center, quadratic_argmin, inverse_weighted_center
-                        cut_value  (valley-level heuristic pick; the overall function returns the widest valley's cut_value)
+                # 2. Smooth the histogram counts (Gaussian)
+                smoothed_counts = gaussian_filter1d(counts, sigma=2)
 
-                Edit the CONFIG constants below to tune behavior.
-                """
+                # 3. Identify local minima & maxima in the smoothed histogram
+                minima_indices = argrelextrema(smoothed_counts, np.less)[0]
+                maxima_indices = argrelextrema(smoothed_counts, np.greater)[0]
 
-                # -----------------
-                # CONFIG (edit as needed)
-                # -----------------
-                SCORE_CUTOFF = 1       # only include scores < this
-                BINS = 50              # histogram bins
-                SIGMA = 2              # Gaussian smoothing sigma (in bins)
-                PROMINENCE = None      # pass to find_peaks to filter noise (None = no filter)
-                RANGE = None           # (min,max) for histogram; e.g., (0,1). None = auto from data.
-                FLOOR_FRAC = 0.05      # fraction of valley depth defining "floor" for flatness calc
-                FLATNESS_FRAC = 0.1    # if std(floor) < FLATNESS_FRAC * depth -> sharp valley -> use argmin
+                # 4. For each local minimum, check the distance to its nearest flank maxima
+                widest_width = 0
+                widest_min_index = None
 
-                # -----------------
-                # Nested helpers
-                # -----------------
-                def _extract_scores(ranking, cutoff):
-                        return np.array([row[1] for row in ranking if row[1] < cutoff], dtype=float)
+                for min_idx in minima_indices:
+                        left_max = max([m for m in maxima_indices if m < min_idx], default=None)
+                        right_max = min([m for m in maxima_indices if m > min_idx], default=None)
+                        if left_max is not None and right_max is not None:
+                        width = right_max - left_max
+                        if width > widest_width:
+                                widest_width = width
+                                widest_min_index = min_idx
 
-                def _hist_and_smooth(scores, bins, sigma, range_):
-                        counts, edges = np.histogram(scores, bins=bins, range=range_)
-                        smoothed = gaussian_filter1d(counts.astype(float), sigma=sigma)
-                        centers = 0.5 * (edges[:-1] + edges[1:])
-                        return counts, edges, smoothed, centers
+                # 5. Use the midpoint of the selected minimum’s bin edges as threshold
+                if widest_min_index is not None:
+                        threshold = (bin_edges[widest_min_index] + bin_edges[widest_min_index+1]) / 2
+                        return threshold
 
-                def _flanking_maxima(m, max_idx):
-                        left = max_idx[max_idx < m]
-                        right = max_idx[max_idx > m]
-                        if len(left) == 0 or len(right) == 0:
-                                return None, None
-                        return left[-1], right[0]
+                # Fallback
+                return 0
 
-                def _valley_stats(m, left_max, right_max, edges, smoothed, centers):
-                        left_edge = edges[left_max]
-                        right_edge = edges[right_max + 1]  # upper bound of right max bin
-                        width = right_edge - left_edge
-
-                        lc = smoothed[left_max]
-                        rc = smoothed[right_max]
-                        mc = smoothed[m]
-                        depth = min(lc, rc) - mc  # conservative
-
-                        sl = slice(left_max, right_max + 1)
-                        local_counts = smoothed[sl]
-                        local_centers = centers[sl]
-
-                        # representatives
-                        min_bin_center = 0.5 * (edges[m] + edges[m + 1])
-                        valley_midpoint = 0.5 * (left_edge + right_edge)
-                        argmin_center = local_centers[np.argmin(local_counts)]
-
-                        # quadratic fit
-                        if len(local_centers) >= 3:
-                                a, b, c = np.polyfit(local_centers, local_counts, deg=2)
-                                quad_min = -b / (2 * a) if a != 0 else argmin_center
-                        else:
-                                quad_min = argmin_center
-
-                        # inverse-count weighted
-                        counts_clip = np.clip(local_counts, 1e-12, None)
-                        weights = 1.0 / counts_clip
-                        inv_weight_center = np.sum(weights * local_centers) / np.sum(weights)
-
-                        # flatness
-                        if depth > 0:
-                                low_mask = local_counts < (mc + FLOOR_FRAC * depth)
-                        else:
-                                low_mask = np.ones_like(local_counts, dtype=bool)
-
-                        low_counts = local_counts[low_mask]
-                        flatness = np.std(low_counts) if low_counts.size > 1 else 0.0
-
-                        # valley-level cut heuristic
-                        if depth > 0 and flatness < FLATNESS_FRAC * depth:
-                                cut_value = argmin_center
-                        else:
-                                cut_value = valley_midpoint
-
-                        return {
-                        "min_bin": int(m),
-                        "left_max_bin": int(left_max),
-                        "right_max_bin": int(right_max),
-                        "width": float(width),
-                        "depth": float(depth),
-                        "flatness": float(flatness),
-                        "min_count": float(mc),
-                        "left_max_count": float(lc),
-                        "right_max_count": float(rc),
-                        "left_edge": float(left_edge),
-                        "right_edge": float(right_edge),
-                        "min_bin_center": float(min_bin_center),
-                        "valley_midpoint": float(valley_midpoint),
-                        "argmin_center": float(argmin_center),
-                        "quadratic_argmin": float(quad_min),
-                        "inverse_weighted_center": float(inv_weight_center),
-                        "cut_value": float(cut_value),
-                        }
-
-                # -----------------
-                # Main body
-                # -----------------
-                scores = _extract_scores(ranking, SCORE_CUTOFF)
-                if scores.size == 0:
-                        return {
-                        "scores": scores,
-                        "cut_value": None,
-                        "widest_valley": None,
-                        "valleys": [],
-                        "bin_edges": None,
-                        "bin_centers": None,
-                        "score_counts": None,
-                        "smoothed_counts": None,
-                        }
-
-                score_counts, bin_edges, smoothed_counts, bin_centers = _hist_and_smooth(
-                        scores, BINS, SIGMA, RANGE
-                )
-
-                # maxima / minima
-                max_idx, _ = find_peaks(smoothed_counts, prominence=PROMINENCE)
-                min_idx, _ = find_peaks(-smoothed_counts, prominence=PROMINENCE)
-
-                valleys = []
-                for m in min_idx:
-                        left_max, right_max = _flanking_maxima(m, max_idx)
-                        if left_max is None or right_max is None:
-                                continue
-                        v = _valley_stats(m, left_max, right_max, bin_edges, smoothed_counts, bin_centers)
-                        valleys.append(v)
-
-                widest_valley = max(valleys, key=lambda d: d["width"]) if valleys else None
-                cut_value = widest_valley["cut_value"] if widest_valley is not None else None
-
-                return {
-                        "scores": scores,
-                        "bin_edges": bin_edges,
-                        "bin_centers": bin_centers,
-                        "score_counts": score_counts,
-                        "smoothed_counts": smoothed_counts,
-                        "valleys": valleys,
-                        "widest_valley": widest_valley,
-                        "cut_value": cut_value,
-                }
         
-        threshold = sum(get_threshold(ranking)["cut_value"] for ranking in rankings) / len(rankings)
+        threshold = sum(get_threshold(ranking) for ranking in rankings) / len(rankings)
         print("Threshold:", threshold)
 
         final_scores = {}
@@ -426,7 +286,7 @@ def supervised_clustering(network_path, genelist_path):
         disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
         print("Number of clusters:", len(disease_clusters))
 
-        rankings = run_adagio(steiner, disease_genes, disease_clusters) # change to steiner for quick testing
+        rankings = run_adagio(full_graph, disease_genes, disease_clusters) # change to steiner for quick testing
         """
         disease = input("Enter disease: ")
         for i, ranking in enumerate(rankings):
