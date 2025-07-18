@@ -226,7 +226,8 @@ def merge_supervised_cluster_rankings(rankings):
                         left_max = max([m for m in maxima_indices if m < min_idx], default=None)
                         right_max = min([m for m in maxima_indices if m > min_idx], default=None)
                         if left_max is not None and right_max is not None:
-                        width = right_max - left_max
+                                width = right_max - left_max
+                                
                         if width > widest_width:
                                 widest_width = width
                                 widest_min_index = min_idx
