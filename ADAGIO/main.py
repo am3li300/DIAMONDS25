@@ -204,7 +204,7 @@ def merge_supervised_cluster_rankings(rankings):
         def assign_label(score, threshold):
                 return score / max_score if score >= threshold else score
 
-        def get_threshold(ranking, min_n=20, fallback_q=75):
+        def get_threshold(ranking, min_n=20, fallback_q=75, visualize=True):
                 """
                 Minimal but safer rewrite of the original valley-finding heuristic.
 
@@ -235,6 +235,19 @@ def merge_supervised_cluster_rankings(rankings):
                 minima = argrelextrema(smoothed, np.less)[0]
                 maxima = argrelextrema(smoothed, np.greater)[0]
 
+                if visualize:
+                        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+                        plt.figure(figsize=(8, 5))
+                        plt.bar(bin_centers, counts, width=np.diff(bin_edges), alpha=0.4, label="Histogram")
+                        plt.plot(bin_centers, smoothed, label="Smoothed")
+                        plt.scatter(bin_centers[minima], smoothed[minima], color='red', label='Minima', zorder=3)
+                        plt.scatter(bin_centers[maxima], smoothed[maxima], color='green', label='Maxima', zorder=3)
+                        plt.xlabel("Score")
+                        plt.ylabel("Frequency")
+                        plt.title("Histogram + Smoothed Curve (for valley detection)")
+                        plt.legend()
+                        plt.show()
+                        
                 # --- 3. find valley with widest *score-space* span ---
                 widest_span = 0.0
                 best_min = None
