@@ -25,7 +25,7 @@ from joblib import Parallel, delayed
 
 import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
-from scipy.signal import find_peaks
+from scipy.signal import argrelextrema
 
 
 parser = argparse.ArgumentParser()
@@ -201,44 +201,59 @@ def run_adagio(full_graph, disease_genes, disease_clusters):
 def merge_supervised_cluster_rankings(rankings):
         max_score = max(ranking[0][1] for ranking in rankings)
 
-        def assign_label(score, threshold=0.003):
+        def assign_label(score, threshold):
                 return score / max_score if score >= threshold else score
 
-        def get_threshold(ranking):
-                # ranking: list of (gene, score) pairs
-                floats = [item[1] for item in ranking if item[1] <= 1]
+        def get_threshold(ranking, min_n=20, fallback_q=75):
+                """
+                Minimal but safer rewrite of the original valley-finding heuristic.
 
-                # 1. Auto-binned histogram of scores
-                counts, bin_edges = np.histogram(floats, bins='auto')
+                Parameters
+                ----------
+                ranking : list[(gene, score)]
+                min_n   : int        # require at least this many scores to attempt valley search
+                fallback_q : float   # percentile to return when valley search fails
+                """
+                # --- 0. collect scores and exit early if we have nothing ---
+                scores = np.asarray([s for _, s in ranking if s <= 1.0], dtype=float)
+                scores = scores[np.isfinite(scores)]
+                if scores.size == 0:
+                        return 0
 
-                # 2. Smooth the histogram counts (Gaussian)
-                smoothed_counts = gaussian_filter1d(counts, sigma=2)
+                # --- 1. skip valley-finding on tiny clusters; use quantile fallback ---
+                if scores.size < min_n:
+                        return float(np.percentile(scores, fallback_q))
 
-                # 3. Identify local minima & maxima in the smoothed histogram
-                minima_indices = argrelextrema(smoothed_counts, np.less)[0]
-                maxima_indices = argrelextrema(smoothed_counts, np.greater)[0]
+                # --- 2. histogram & smoothing (unchanged except for adaptive sigma) ---
+                counts, bin_edges = np.histogram(scores, bins="auto")
+                if counts.size < 3:                         # need at least 3 bins
+                        return float(np.percentile(scores, fallback_q))
 
-                # 4. For each local minimum, check the distance to its nearest flank maxima
-                widest_width = 0
-                widest_min_index = None
+                sigma = max(1, counts.size // 50)           # light adaptive smoothing
+                smoothed = gaussian_filter1d(counts, sigma=sigma)
 
-                for min_idx in minima_indices:
-                        left_max = max([m for m in maxima_indices if m < min_idx], default=None)
-                        right_max = min([m for m in maxima_indices if m > min_idx], default=None)
-                        if left_max is not None and right_max is not None:
-                                width = right_max - left_max
-                                
-                        if width > widest_width:
-                                widest_width = width
-                                widest_min_index = min_idx
+                minima = argrelextrema(smoothed, np.less)[0]
+                maxima = argrelextrema(smoothed, np.greater)[0]
 
-                # 5. Use the midpoint of the selected minimum’s bin edges as threshold
-                if widest_min_index is not None:
-                        threshold = (bin_edges[widest_min_index] + bin_edges[widest_min_index+1]) / 2
-                        return threshold
+                # --- 3. find valley with widest *score-space* span ---
+                widest_span = 0.0
+                best_min = None
+                for m in minima:
+                        left = maxima[maxima < m]
+                        right = maxima[maxima > m]
+                        if left.size == 0 or right.size == 0:
+                                continue
 
-                # Fallback
-                return 0
+                        span = bin_edges[right.min() + 1] - bin_edges[left.max()]
+                        if span > widest_span:
+                                widest_span = span
+                                best_min = m
+
+                # --- 4. return threshold or fallback ---
+                if best_min is not None:
+                        return 0.5 * (bin_edges[best_min] + bin_edges[best_min + 1])
+
+                return float(np.percentile(scores, fallback_q))
 
         
         threshold = sum(get_threshold(ranking) for ranking in rankings) / len(rankings)
@@ -247,7 +262,7 @@ def merge_supervised_cluster_rankings(rankings):
         final_scores = {}
         for ranking in rankings:
                 for gene, score in ranking:
-                        final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, 0.003)  # find general or adaptive threshold for other diseases
+                        final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, threshold)  # find general or adaptive threshold for other diseases
 
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
 
