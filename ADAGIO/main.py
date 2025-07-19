@@ -204,7 +204,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
         def assign_label(score, threshold):
                 return score / max_score if score >= threshold else score
 
-        def get_threshold(ranking, min_n=20, fallback_q=75, visualize=False):
+        def get_threshold(ranking, min_n=20, fallback_q=75, visualize=True):
                 """
                 Minimal but safer rewrite of the original valley-finding heuristic.
 
@@ -225,7 +225,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                         return float(np.percentile(scores, fallback_q))
 
                 # --- 2. histogram & smoothing (unchanged except for adaptive sigma) ---
-                counts, bin_edges = np.histogram(scores, bins="auto")
+                counts, bin_edges = np.histogram(scores, bins=20)
                 log_counts = np.where(counts > 0, np.log10(counts), np.nan)
 
                 sigma = max(1, log_counts.size // 50)           # light adaptive smoothing
@@ -267,7 +267,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
 
                 return float(np.percentile(scores, fallback_q))
 
-        
+        """
         threshold = sum(get_threshold(ranking) for ranking in rankings) / len(rankings)
         print("Threshold:", threshold)
 
@@ -277,8 +277,8 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                         final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, threshold)  # find general or adaptive threshold for other diseases
 
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
-
         """
+        
         max_score = max(ranking[0][1] for ranking in rankings)
 
         for ranking in rankings:
@@ -293,7 +293,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                         max_rankings[gene] += score 
         
         return sorted(list(max_rankings.items()), key=lambda x: -x[1])
-        """
+        
 
 
 def supervised_clustering(network_path, genelist_path):
