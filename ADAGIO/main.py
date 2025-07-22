@@ -197,9 +197,9 @@ def run_adagio(full_graph, disease_genes, disease_clusters):
                 print("Time of one run:", time()-s)
                 return cluster_ranking
 
-        
+        cluster_rankings = Parallel(n_jobs=1)(delayed(score_cluster)(cl) for cl in disease_clusters)
         original_ranking = sorted(list(model_all.prioritize([Gene(name=g) for g in disease_genes], full_graph)), key=lambda x:-x[1])
-        return original_ranking, Parallel(n_jobs=2)(delayed(score_cluster)(cl) for cl in disease_clusters)
+        return original_ranking, cluster_rankings
 
 def merge_supervised_cluster_rankings(rankings, disease_genes):
         max_score = max(ranking[0][1] for ranking in rankings)
@@ -336,7 +336,7 @@ def supervised_clustering(network_path, genelist_path):
                         if neighbor in disease_genes:
                                 steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
                                         
-        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
+        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.05) # resolution determines num of clusters
         print("Number of clusters:", len(disease_clusters))
         og_ranking, rankings = run_adagio(full_graph, disease_genes, disease_clusters) # change to steiner for quick testing
 
@@ -376,12 +376,12 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for all nodes (k = 20)
         """
-        # graph = EdgeListGarbanzo(network_path, genelist_path)
-        # print(len(graph.graph.edges))
-        # model = ADAGIO()
-        # model.setup(graph.graph)
-        # model.set_add_edges_amount(20) # this will add edges to the graph
-        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        graph = EdgeListGarbanzo(network_path, genelist_path)
+        print(len(graph.graph.edges))
+        model = ADAGIO()
+        model.setup(graph.graph)
+        model.set_add_edges_amount(20) # this will add edges to the graph
+        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
 
         """
@@ -392,7 +392,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """ 
         supervised clustering
         """
-        predictions = supervised_clustering(network_path, genelist_path)
+        # predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
