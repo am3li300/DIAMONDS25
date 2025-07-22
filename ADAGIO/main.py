@@ -28,6 +28,7 @@ from scipy.ndimage import gaussian_filter1d
 from scipy.signal import argrelextrema
 
 from collections import defaultdict
+import pickle
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -178,11 +179,25 @@ def build_steiner_tree(full_graph, disease_genes):
 
         return full_graph.edge_subgraph(steiner_edges).copy()
 
-def run_adagio(full_graph, disease_genes, disease_clusters):
-        set_up_start = time()
-        model_all = ADAGIO()
-        model_all.setup(full_graph) # change to steiner for quick testing
-        model_all.set_add_edges_amount(20)
+def run_adagio(full_graph, disease_genes, disease_clusters, model_path):
+        if model_path:
+                model_file = open(model_path, "r")
+                model_all = pickle.load(model_file)
+        else:
+                ## only run this once, comment it out after
+                model_out = open(input("Enter output path to store model: "), "w")
+
+                set_up_start = time()
+                model_all = ADAGIO()
+                model_all.setup(full_graph) # change to steiner for quick testing
+                model_all.set_add_edges_amount(20)
+
+                ## only run this once, comment it out after
+                pickle.dump(model_all, model_out)
+
+        
+
+                
 
         print("Set up time:", time()-set_up_start)
 
@@ -320,6 +335,10 @@ def lenore_merging(og_ranking, rankings):
 
 
 def supervised_clustering(network_path, genelist_path):
+        use_pickle = input("Enter 1 to use pickled model file, 0 otherwise: ")
+        if use_pickle:
+                model_path = input("Enter path to model file: ")
+
         disease_genes = set(get_disease_genes(genelist_path))
         full_graph = nx.read_weighted_edgelist(network_path)
 
@@ -338,7 +357,7 @@ def supervised_clustering(network_path, genelist_path):
                                         
         disease_clusters = nx.community.louvain_communities(steiner, resolution=0.2) # resolution determines num of clusters
         print("Number of clusters:", len(disease_clusters))
-        og_ranking, rankings = run_adagio(full_graph, disease_genes, disease_clusters) # change to steiner for quick testing
+        og_ranking, rankings = run_adagio(full_graph, disease_genes, disease_clusters, model_path) # change to steiner for quick testing
 
 
         for i, ranking in enumerate(rankings):
