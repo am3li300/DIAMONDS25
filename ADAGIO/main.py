@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import argrelextrema
 
+from collections import defaultdict
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -205,15 +206,14 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                 return score / max_score if score >= threshold else score
 
         def get_threshold(ranking, min_n=20, fallback_q=75, visualize=True):
-                """
-                Minimal but safer rewrite of the original valley-finding heuristic.
+                # valley-finding heuristic
 
-                Parameters
-                ----------
-                ranking : list[(gene, score)]
-                min_n   : int        # require at least this many scores to attempt valley search
-                fallback_q : float   # percentile to return when valley search fails
-                """
+                # Parameters
+                # ----------
+                # ranking : list[(gene, score)]
+                # min_n   : int        # require at least this many scores to attempt valley search
+                # fallback_q : float   # percentile to return when valley search fails
+                
                 # --- 0. collect scores and exit early if we have nothing ---
                 scores = np.asarray([s for gene, s in ranking if 0 < s <= 1.0 and gene not in disease_genes], dtype=float)
                 scores = scores[np.isfinite(scores)]
@@ -267,7 +267,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
 
                 return float(np.percentile(scores, fallback_q))
 
-        """
+        
         threshold = sum(get_threshold(ranking) for ranking in rankings) / len(rankings)
         print("Threshold:", threshold)
 
@@ -278,7 +278,6 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
 
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
         """
-        
         max_score = max(ranking[0][1] for ranking in rankings)
 
         for ranking in rankings:
@@ -293,8 +292,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                         max_rankings[gene] += score 
         
         return sorted(list(max_rankings.items()), key=lambda x: -x[1])
-        
-
+        """
 
 def supervised_clustering(network_path, genelist_path):
         disease_genes = set(get_disease_genes(genelist_path))
@@ -346,7 +344,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         adaptive k for all nodes
         """
-        # predictions = sorted(list(model.david_prioritize(1000, graph.graph, True)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.david_prioritize(500, graph.graph, True)), key=lambda x: x[1], reverse=True)
 
         """
         constant k for all nodes (k = 20)
