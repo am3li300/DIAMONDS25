@@ -230,7 +230,7 @@ glide-compute \
   --neighbors-return-format dataframe
 """
 
-
+# output/disease_cluster/schizophrenia_cluster_0.txt
 # STRING network
 """
 python3 main.py \

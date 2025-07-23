@@ -326,8 +326,12 @@ def lenore_merging(og_ranking, rankings):
 
         final_scores = {}
         for i, (gene, score) in enumerate(og_ranking):
+                """
                 if best_placements[gene] <= i:
                         final_scores[gene] = score * 1.2
+                """
+                if best_placements[gene]-i > 20:
+                        final_scores[gene] = score - score*0.2
 
                 else:
                         final_scores[gene] = score
