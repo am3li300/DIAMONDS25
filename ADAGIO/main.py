@@ -182,7 +182,7 @@ def build_steiner_tree(full_graph, disease_genes):
 def run_adagio(full_graph, disease_genes, disease_clusters, model_path=''):
         set_up_start = time()
         if model_path:
-                model_file = open(model_path, "r")
+                model_file = open(model_path, "rb")
                 model_all = pickle.load(model_file)
 
         else:
