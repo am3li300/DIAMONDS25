@@ -24,7 +24,7 @@ class RandomWalkWithRestart(Feta):
         pr = nx.pagerank(
             graph,
             alpha=self._desc.hyper_params["alpha"],
-            personalization=personalization)
+            personalization=personalization) # tol=0.001
 
         data_set = set()
 

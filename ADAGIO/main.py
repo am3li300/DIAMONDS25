@@ -28,7 +28,7 @@ from scipy.ndimage import gaussian_filter1d
 from scipy.signal import argrelextrema
 
 from collections import defaultdict
-import pickle
+import dill as pickle
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
@@ -179,15 +179,16 @@ def build_steiner_tree(full_graph, disease_genes):
 
         return full_graph.edge_subgraph(steiner_edges).copy()
 
-def run_adagio(full_graph, disease_genes, disease_clusters, model_path):
+def run_adagio(full_graph, disease_genes, disease_clusters, model_path=''):
+        set_up_start = time()
         if model_path:
                 model_file = open(model_path, "r")
                 model_all = pickle.load(model_file)
+
         else:
                 ## only run this once, comment it out after
-                model_out = open(input("Enter output path to store model: "), "w")
+                model_out = open(input("Enter output path to store model: "), "wb")
 
-                set_up_start = time()
                 model_all = ADAGIO()
                 model_all.setup(full_graph) # change to steiner for quick testing
                 model_all.set_add_edges_amount(20)
@@ -335,9 +336,8 @@ def lenore_merging(og_ranking, rankings):
 
 
 def supervised_clustering(network_path, genelist_path):
-        use_pickle = input("Enter 1 to use pickled model file, 0 otherwise: ")
-        if use_pickle:
-                model_path = input("Enter path to model file: ")
+        use_pickle = int(input("Enter 1 to use pickled model file, 0 otherwise: "))
+        model_path = input("Enter path to model file: ") if use_pickle else ''
 
         disease_genes = set(get_disease_genes(genelist_path))
         full_graph = nx.read_weighted_edgelist(network_path)
@@ -395,12 +395,12 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for all nodes (k = 20)
         """
-        graph = EdgeListGarbanzo(network_path, genelist_path)
-        print(len(graph.graph.edges))
-        model = ADAGIO()
-        model.setup(graph.graph)
-        model.set_add_edges_amount(20) # this will add edges to the graph
-        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # graph = EdgeListGarbanzo(network_path, genelist_path)
+        # print(len(graph.graph.edges))
+        # model = ADAGIO()
+        # model.setup(graph.graph)
+        # model.set_add_edges_amount(20) # this will add edges to the graph
+        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
 
         """
@@ -411,7 +411,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """ 
         supervised clustering
         """
-        # predictions = supervised_clustering(network_path, genelist_path)
+        predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
