@@ -1,3 +1,5 @@
+import os
+
 def merge_supervised_cluster_rankings(rankings, disease_genes):
         max_score = max(ranking[0][1] for ranking in rankings)
 
@@ -100,27 +102,61 @@ def lenore_merging(og_ranking, rankings):
         if not, lower the score by some number
         re-sort og ranking
         """
-        best_placements = defaultdict(int)
+        best_placements = {}
         for ranking in rankings:
                 for i, (gene, score) in enumerate(ranking):
-                        best_placements[gene] = min(best_placements[gene], i)
+                        best_placements[gene] = min(best_placements.get(gene, float("inf")), i)
 
         final_scores = {}
+        counter = 0
         for i, (gene, score) in enumerate(og_ranking):
-                if best_placements[gene] <= i:
-                        final_scores[gene] = score * 1.2
+                
+                # if best_placements[gene] <= i:
+                #         counter += 1
+                #         # print("A gene at this placement will have score changed:", i)
+                #         final_scores[gene] = score * 1.2
+
+                
+                if best_placements[gene]-i > 0:
+                        counter += 1
+                        if i < 1001:
+                                print("A gene at this placement will have score changed:", i, "best_placement:", best_placements[gene])
+                        final_scores[gene] = score - score*0.2
 
                 else:
                         final_scores[gene] = score
 
+        print("A total of " + str(counter) + " genes were modified")
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
 
 
 def main():
-        rankings_path = input("Enter path to rankings folder: ")
-        rankings
+        def read_ranking(file):
+                ranking = []
+                for line in file:
+                        gene, score = line.split()
+                        try:
+                                score = float(score)
+                                ranking.append((gene, score))
+
+                        except:
+                                continue
+
+                return ranking
+
+        og_ranking = read_ranking(open(input("Enter path to original ranking: ")))
+        cluster_path = input("Enter path to cluster ranking folder: ")
+        cluster_rankings = []
+        for fileName in os.listdir(cluster_path):
+                f = open(cluster_path + "/" + fileName, "r")
+                cluster_rankings.append(read_ranking(f))
+
+        x = lenore_merging(og_ranking, cluster_rankings)
+        outfile = open(input("Enter output file path: "), 'w')
+        for gene, score in x:
+                outfile.write(f"{gene}\t{score}\n")
+        
 
 
 if __name__ == "__main__":
-        args = parser.parse_args()
-        main(args.network, args.genelist, args.out)
+        main()

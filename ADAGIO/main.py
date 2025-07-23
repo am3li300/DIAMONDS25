@@ -319,10 +319,10 @@ def lenore_merging(og_ranking, rankings):
         if not, lower the score by some number
         re-sort og ranking
         """
-        best_placements = defaultdict(int)
+        best_placements = {}
         for ranking in rankings:
                 for i, (gene, score) in enumerate(ranking):
-                        best_placements[gene] = min(best_placements[gene], i)
+                        best_placements[gene] = min(best_placements.get(gene, float("inf")), i)
 
         final_scores = {}
         for i, (gene, score) in enumerate(og_ranking):
