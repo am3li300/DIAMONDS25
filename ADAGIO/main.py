@@ -325,17 +325,25 @@ def lenore_merging(og_ranking, rankings):
                         best_placements[gene] = min(best_placements.get(gene, float("inf")), i)
 
         final_scores = {}
+        counter = 0
         for i, (gene, score) in enumerate(og_ranking):
-                """
-                if best_placements[gene] <= i:
-                        final_scores[gene] = score * 1.2
-                """
-                if best_placements[gene]-i > 20:
+                
+                # if best_placements[gene] <= i:
+                #         counter += 1
+                #         # print("A gene at this placement will have score changed:", i)
+                #         final_scores[gene] = score * 1.2
+
+                
+                if best_placements[gene]-i > 0:
+                        counter += 1
+                        if i < 1001:
+                                print("A gene at this placement will have score changed:", i, "best_placement:", best_placements[gene])
                         final_scores[gene] = score - score*0.2
 
                 else:
                         final_scores[gene] = score
 
+        print("A total of " + str(counter) + " genes were modified")
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
 
 
@@ -359,7 +367,26 @@ def supervised_clustering(network_path, genelist_path):
                         if neighbor in disease_genes:
                                 steiner.add_edge(gene, neighbor, weight=full_graph[gene][neighbor]['weight'])
                                         
-        disease_clusters = nx.community.louvain_communities(steiner, resolution=0.05) # resolution determines num of clusters
+        # disease_clusters = nx.community.louvain_communities(steiner, resolution=0.05) # resolution determines num of clusters
+
+
+        # markov clustering
+        indices_to_nodes = list(steiner.nodes())
+
+        matrix_array = nx.to_scipy_sparse_array(steiner, nodelist=indices_to_nodes)
+        matrix = csr_matrix(matrix_array)
+
+        # expansion = 2, inflation = 2; inflation determines granularity
+        res = mc.run_mcl(matrix, inflation=1.1)
+
+        clustering = mc.get_clusters(res)
+        disease_clusters = []
+        for c in clustering:
+                disease_clusters.append({indices_to_nodes[indx] for indx in c})
+
+
+
+
         print("Number of clusters:", len(disease_clusters))
         og_ranking, rankings = run_adagio(full_graph, disease_genes, disease_clusters, model_path) # change to steiner for quick testing
 
