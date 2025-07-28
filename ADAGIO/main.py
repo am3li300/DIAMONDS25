@@ -286,13 +286,13 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                 return float(np.percentile(scores, fallback_q))
 
         
-        threshold = sum(get_threshold(ranking) for ranking in rankings) / len(rankings)
-        print("Threshold:", threshold)
+        thresholds = [get_threshold(ranking) for ranking in rankings]
 
         final_scores = {}
-        for ranking in rankings:
+        for i, ranking in enumerate(rankings):
+                print("Threshold for cluster {0}:".format(i), thresholds[i])
                 for gene, score in ranking:
-                        final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, threshold)  # find general or adaptive threshold for other diseases
+                        final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, thresholds[i])
 
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
         """
