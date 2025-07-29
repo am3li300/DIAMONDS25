@@ -397,7 +397,7 @@ def supervised_clustering(network_path, genelist_path):
                                 fout.write(f"{gene.name}\t{score}\n")
 
 
-        return lenore_merging(og_ranking, rankings) # merge_supervised_cluster_rankings(rankings, disease_genes)
+        return merge_supervised_cluster_rankings(rankings, disease_genes) # lenore_merging(og_ranking, rankings)
         
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
@@ -406,12 +406,14 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         Baseline ADAGIO - constant k for disease nodes only (k = 20)
         """
-        # graph = EdgeListGarbanzo(network_path, genelist_path)
+        graph = EdgeListGarbanzo(network_path, genelist_path)
         # print(len(graph.graph.edges))
         # model = ADAGIO()
         # model.setup(graph.graph)
         # model.set_add_edges_amount(20) # this will add edges to the graph
-        # sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        model_file = open("adagio_model", "rb")
+        model = pickle.load(model_file)
+        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
@@ -426,11 +428,11 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for all nodes (k = 20)
         """
-        graph = EdgeListGarbanzo(network_path, genelist_path)
-        print(len(graph.graph.edges))
-        model_file = open(input("Enter file path to model: "), "rb")
-        model = pickle.load(model_file)
-        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # graph = EdgeListGarbanzo(network_path, genelist_path)
+        # print(len(graph.graph.edges))
+        # model_file = open(input("Enter file path to model: "), "rb")
+        # model = pickle.load(model_file)
+        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
 
         """

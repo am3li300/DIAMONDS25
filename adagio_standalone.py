@@ -253,7 +253,7 @@ python3 main.py \
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --genelist '../cross_validation/partitions/diabetes_set_STRING/3_diabetes_new_seeds_0.txt' \
-  --out '../DB_lenore_test'
+  --out '../DB_test'
 
 """
 
