@@ -380,7 +380,7 @@ def supervised_clustering(network_path, genelist_path):
         matrix = csr_matrix(matrix_array)
 
         # expansion = 2, inflation = 2; inflation determines granularity
-        res = mc.run_mcl(matrix, inflation=1.3)
+        res = mc.run_mcl(matrix, inflation=1.2)
 
         clustering = mc.get_clusters(res)
         disease_clusters = []
