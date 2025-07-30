@@ -242,8 +242,8 @@ python3 main.py \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitions/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/SZ_STRING_supervised/3_schizophrenia_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/RA_STRING/3_RA_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/RA_STRING_constant_k_20/3_RA_cross_validation_0.out'
 
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
