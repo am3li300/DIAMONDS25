@@ -218,8 +218,6 @@ def run_adagio(full_graph, disease_genes, disease_clusters, model_path=''):
         return original_ranking, cluster_rankings
 
 def merge_supervised_cluster_rankings(rankings, disease_genes):
-        max_score = max(ranking[0][1] for ranking in rankings)
-
         def assign_label(score, threshold):
                 return score / max_score if score >= threshold else score
 
@@ -290,6 +288,11 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
 
         final_scores = {}
         for i, ranking in enumerate(rankings):
+                if not ranking:
+                        print("ranking {0} is empty".format(i))
+                        continue
+
+                max_score = ranking[0][1]
                 print("Threshold for cluster {0}:".format(i), thresholds[i])
                 for gene, score in ranking:
                         final_scores[gene] = final_scores.get(gene, 0) + assign_label(score, thresholds[i])
@@ -377,7 +380,7 @@ def supervised_clustering(network_path, genelist_path):
         matrix = csr_matrix(matrix_array)
 
         # expansion = 2, inflation = 2; inflation determines granularity
-        res = mc.run_mcl(matrix, inflation=1.1)
+        res = mc.run_mcl(matrix, inflation=1.3)
 
         clustering = mc.get_clusters(res)
         disease_clusters = []
@@ -411,14 +414,14 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         # model = ADAGIO()
         # model.setup(graph.graph)
         # model.set_add_edges_amount(20) # this will add edges to the graph
-        model_file = open("adagio_model", "rb")
-        model = pickle.load(model_file)
+        # model_file = open("adagio_model", "rb")
+        # model = pickle.load(model_file)
         # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
         """
-        predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for all nodes
@@ -443,7 +446,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """ 
         supervised clustering
         """
-        # predictions = supervised_clustering(network_path, genelist_path)
+        predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
