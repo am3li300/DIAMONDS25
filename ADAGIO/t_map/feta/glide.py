@@ -337,6 +337,9 @@ class ADAGIO(PreComputeFeta):
             return rwr.prioritize(disease_genes, graph)
 
 
+    """
+    adaptive k for disease genes only
+    """
     def david_prioritize_2(self, disease_genes: List[Gene],
                    graph: Union[nx.Graph, None],
                    tissue_file: Optional[str] = None,
@@ -369,7 +372,7 @@ class ADAGIO(PreComputeFeta):
             return rwr.prioritize(disease_genes, graph)
 
     """
-    David function
+    adaptive k for all genes
     """
     def david_prioritize(self, max_threshold: int, graph: Union[nx.Graph, None], adaptive_k: bool = False, tissue_file: Optional[str] = None) -> Set[Tuple[Gene, float]]:
 
