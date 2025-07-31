@@ -235,7 +235,8 @@ glide-compute \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../data/seed_nodes/schizophrenia_drug.txt' 
+  --genelist '../data/seed_nodes/rheumatoid_arthritis_drug.txt' \
+  --out '../output/RA/disease_cluster_threshold.out'
 """
 
 # cross validation

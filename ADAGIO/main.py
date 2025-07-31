@@ -379,7 +379,8 @@ def supervised_clustering(network_path, genelist_path):
         matrix_array = nx.to_scipy_sparse_array(steiner, nodelist=indices_to_nodes)
         matrix = csr_matrix(matrix_array)
 
-        # expansion = 2, inflation = 2; inflation determines granularity
+        # inflation = 2; inflation determines granularity
+        # allergy: 1.3; SZ & RA: 1.2
         res = mc.run_mcl(matrix, inflation=1.2)
 
         clustering = mc.get_clusters(res)
@@ -416,7 +417,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         # model.set_add_edges_amount(20) # this will add edges to the graph
         model_file = open("adagio_model", "rb")
         model = pickle.load(model_file)
-        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
@@ -446,7 +447,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """ 
         supervised clustering
         """
-        # predictions = supervised_clustering(network_path, genelist_path)
+        predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
