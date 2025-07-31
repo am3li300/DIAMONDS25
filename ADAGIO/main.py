@@ -350,6 +350,34 @@ def lenore_merging(og_ranking, rankings):
         return sorted(list(final_scores.items()), key=lambda x: -x[1])
 
 
+def remove_seeds(ranking, disease_genes):
+        remove_idx = []
+        for i, (gene, score) in enumerate(ranking):
+                if gene in disease_genes:
+                        remove_idx.append(i)
+
+        for i in remove_idx:
+                ranking.pop(i)
+
+def merge_og_supervised(og_ranking, supervised_ranking):
+        assert len(og_ranking) == len(supervised_ranking), "Rankings are not the same length"
+        
+        genes = set()
+        final_ranking = []
+
+        def add_gene(curr_line, curr_gene):
+                if curr_gene not in genes:
+                        final_ranking.append(curr_line)
+                        genes.add(curr_gene)
+
+
+        for i in range(0, len(og_ranking)):
+                add_gene(og_ranking[i], og_ranking[i][0])
+                add_gene(supervised_ranking[i], og_ranking[i][0])
+                
+        return final_ranking
+
+
 def supervised_clustering(network_path, genelist_path):
         use_pickle = int(input("Enter 1 to use pickled model file, 0 otherwise: "))
         model_path = input("Enter path to model file: ") if use_pickle else ''
@@ -400,8 +428,12 @@ def supervised_clustering(network_path, genelist_path):
                         for gene, score in ranking:
                                 fout.write(f"{gene.name}\t{score}\n")
 
+        supervised_ranking = merge_supervised_cluster_rankings(rankings, disease_genes) # lenore_merging(og_ranking, rankings)
 
-        return merge_supervised_cluster_rankings(rankings, disease_genes) # lenore_merging(og_ranking, rankings)
+        remove_seeds(og_ranking, disease_genes)
+        remove_seeds(supervised_ranking, disease_genes)
+
+        return merge_og_supervised(og_ranking, supervised_ranking)
         
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
@@ -417,7 +449,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         # model.set_add_edges_amount(20) # this will add edges to the graph
         model_file = open("../../adagio_model", "rb")
         model = pickle.load(model_file)
-        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
@@ -447,7 +479,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """ 
         supervised clustering
         """
-        predictions = supervised_clustering(network_path, genelist_path)
+        # predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
