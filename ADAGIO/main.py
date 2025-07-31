@@ -410,7 +410,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         Baseline ADAGIO - constant k for disease nodes only (k = 20)
         """
-        graph = EdgeListGarbanzo(network_path, genelist_path)
+        # graph = EdgeListGarbanzo(network_path, genelist_path)
         # print(len(graph.graph.edges))
         # model = ADAGIO()
         # model.setup(graph.graph)
