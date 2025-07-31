@@ -415,7 +415,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         # model = ADAGIO()
         # model.setup(graph.graph)
         # model.set_add_edges_amount(20) # this will add edges to the graph
-        model_file = open("adagio_model", "rb")
+        model_file = open("../../adagio_model", "rb")
         model = pickle.load(model_file)
         # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
