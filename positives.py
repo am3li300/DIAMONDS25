@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 NUM_GENES = int(input("Enter number of genes in network: ")) # 11882 for STRING network, 10317 for humanbase
+PRC_RANDOM_Y = float("inf")
 
 def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
     """
@@ -80,10 +81,12 @@ def plot_auroc(avgFPR, avgRecall):
 
 def plot_auprc(avgRecall, avgPrecision):
     plt.plot(avgRecall, avgPrecision, label="Mean PRC curve")
-    plt.plot([0, 1], [0, 1], 'k--', label='Random')
+    plt.axhline(y=PRC_RANDOM_Y, linestyle='--', color='grey', alpha=0.6, label="Random")
     plt.xlabel("Recall")
-    plt.ylabel("Precision/TPR")
+    plt.ylabel("Precision")
     plt.title("Average PRC Curve Across Folds")
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
     plt.legend()
     plt.show()
 
@@ -93,6 +96,7 @@ def plot_auprc(avgRecall, avgPrecision):
 
 
 def main():
+    global PRC_RANDOM_Y
     """
     -numPos represents the number of true positives; how many genes in the ranking file trying to be recovered (not seeds)
     -numNeg represents the number of true negatives; includes both genes that were never disease genes and disease genes that were used as seeds
@@ -113,6 +117,8 @@ def main():
     # clustering louvain: 51; clustering markov: 50; walktrap: 49
     numPos = int(input("Enter number of total positives (genes trying to be recovered): "))
     numNeg = NUM_GENES - numPos
+
+    PRC_RANDOM_Y = numPos/(numPos+numNeg)
 
     recall = [0]*(NUM_GENES + 1) # same as TPR
     FPR = [0]*(NUM_GENES + 1)
