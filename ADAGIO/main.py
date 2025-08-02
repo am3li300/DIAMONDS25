@@ -284,7 +284,7 @@ def merge_supervised_cluster_rankings(rankings, disease_genes):
                 return float(np.percentile(scores, fallback_q))
 
         
-        thresholds = [get_threshold(ranking) for ranking in rankings]
+        thresholds = [get_threshold(ranking, 20, 75, False) for ranking in rankings]
 
         final_scores = {}
         for i, ranking in enumerate(rankings):
@@ -373,7 +373,7 @@ def merge_og_supervised(og_ranking, supervised_ranking):
 
         for i in range(0, len(og_ranking)):
                 add_gene(og_ranking[i], og_ranking[i][0])
-                add_gene(supervised_ranking[i], og_ranking[i][0])
+                add_gene(supervised_ranking[i], supervised_ranking[i][0])
                 
         return final_ranking
 
@@ -385,7 +385,7 @@ def supervised_clustering(network_path, genelist_path):
         disease_genes = set(get_disease_genes(genelist_path))
         full_graph = nx.read_weighted_edgelist(network_path)
 
-        disease = input("Enter disease: ")
+        # disease = input("Enter disease: ")
 
        
         steiner = build_steiner_tree(full_graph, disease_genes)
@@ -409,7 +409,7 @@ def supervised_clustering(network_path, genelist_path):
 
         # inflation = 2; inflation determines granularity
         # allergy: 1.3; SZ & RA: 1.2
-        res = mc.run_mcl(matrix, inflation=1.3)
+        res = mc.run_mcl(matrix, inflation=1.2)
 
         clustering = mc.get_clusters(res)
         disease_clusters = []
@@ -422,12 +422,12 @@ def supervised_clustering(network_path, genelist_path):
         print("Number of clusters:", len(disease_clusters))
         og_ranking, rankings = run_adagio(full_graph, disease_genes, disease_clusters, model_path) # change to steiner for quick testing
 
-
+        """
         for i, ranking in enumerate(rankings):
                 with open(f"../output/disease_cluster/{disease}_cluster_{i}.txt", "w") as fout:
                         for gene, score in ranking:
                                 fout.write(f"{gene.name}\t{score}\n")
-
+        """
         supervised_ranking = merge_supervised_cluster_rankings(rankings, disease_genes) # lenore_merging(og_ranking, rankings)
 
         remove_seeds(og_ranking, disease_genes)
