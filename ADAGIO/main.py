@@ -359,6 +359,15 @@ def remove_seeds(ranking, disease_genes):
         for i in reversed(remove_idx):
                 ranking.pop(i)
 
+def dale_merge(og_ranking, supervised_ranking):
+        mapping = {gene: score for gene, score in og_ranking}
+        final_ranking = []
+        for gene, score in supervised_ranking:
+                final_ranking.append((gene, score*mapping[gene]))
+
+        final_ranking.sort(key=lambda x: -x[1])
+        return final_ranking
+
 def merge_og_supervised(og_ranking, supervised_ranking):
         assert len(og_ranking) == len(supervised_ranking), "Rankings are not the same length"
         
@@ -433,7 +442,7 @@ def supervised_clustering(network_path, genelist_path):
         remove_seeds(og_ranking, disease_genes)
         remove_seeds(supervised_ranking, disease_genes)
 
-        return merge_og_supervised(og_ranking, supervised_ranking)
+        return dale_merge(og_ranking, supervised_ranking) # merge_og_supervised(og_ranking, supervised_ranking)
         
 
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
