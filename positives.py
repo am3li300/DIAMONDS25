@@ -111,7 +111,7 @@ def main():
     partition = int(input("Enter number of folds used for validation: "))
 
     # 163 for schizophrenia, 95 for RA, 114 for humanbase SZ
-    numDisease = int(input("Enter total number of seed genes: "))
+    # numDisease = int(input("Enter total number of seed genes: "))
 
     # numPos = numDisease // partition
     # clustering louvain: 51; clustering markov: 50; walktrap: 49
