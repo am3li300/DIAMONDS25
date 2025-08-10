@@ -460,12 +460,12 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         # model = ADAGIO()
         # model.setup(graph.graph)
         # model.set_add_edges_amount(20) # this will add edges to the graph
-        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
         """
-        # predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for all nodes
