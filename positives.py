@@ -65,6 +65,7 @@ def count_positives(file, threshold):
 
     return trueP, falseP
 
+
 def plot_auroc(avgFPR, avgRecall):
     plt.plot(avgFPR, avgRecall, label="Mean ROC curve")
     plt.axvline(0.10, ls='--', color='grey', alpha=0.6)   # t-AUROC cutoff
@@ -124,34 +125,78 @@ def main():
     FPR = [0]*(NUM_GENES + 1)
     precision = [0]*(NUM_GENES + 1)
 
+
+    def process_file(file):
+        f = open(directory + '/' + file, 'r')
+        trueP = falseP = 0.0
+        threshold = 1
+        for line in f:
+            if threshold > NUM_GENES:
+                break
+
+            try:
+                label = int(line.split()[2])
+                if label == 1:
+                    trueP += 1.0
+
+                else:
+                    falseP += 1.0
+
+                recall[threshold] += trueP / numPos
+                FPR[threshold] += falseP / numNeg
+                precision[threshold] += trueP / threshold
+                threshold += 1
+
+            except:
+                continue
+
+        p = trueP / numPos
+        n = falseP / numNeg
+        while threshold <= NUM_GENES:
+            recall[threshold] += p
+            FPR[threshold] += n
+            precision[threshold] += trueP / threshold
+            threshold += 1
+
+        f.close()
+    
     numFiles = 0
     for file in os.listdir(directory):
         numFiles += 1
-        # sum the TPR and FPR for each threshold across each data set
-        f = open(directory + '/' + file, 'r')
-        for threshold in range(1, NUM_GENES + 1):
-            f.seek(0)
-            trueP, falseP = count_positives(f, threshold)
-            if threshold == 100:
-                print(trueP*1.0/numPos)
+        process_file(file)
 
-            recall[threshold] += trueP*1.0 / numPos
-            FPR[threshold] += falseP*1.0 / numNeg
-            precision[threshold] += trueP*1.0 / threshold
+    def old(): # original way to process TPR and FPR for each file
+        nonlocal numFiles
+        for file in os.listdir(directory):
+            numFiles += 1
+            # sum the TPR and FPR for each threshold across each data set
+            f = open(directory + '/' + file, 'r')
+            for threshold in range(1, NUM_GENES + 1):
+                f.seek(0)
+                trueP, falseP = count_positives(f, threshold)
+                if threshold == 100:
+                    print(trueP*1.0/numPos)
 
-        f.close()   
+                recall[threshold] += trueP*1.0 / numPos
+                FPR[threshold] += falseP*1.0 / numNeg
+                precision[threshold] += trueP*1.0 / threshold
+
+            f.close()   
+    
+    # numFiles = 0
+    # old()
 
     # get the average for each threshold       
     avgRecall = [0]*(NUM_GENES + 1)
     avgFPR = [0]*(NUM_GENES + 1)
     avgPrecision = [0]*(NUM_GENES + 1)
+
     for i in range(1, NUM_GENES + 1):
         avgRecall[i] = recall[i]/numFiles
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
 
     plot_auroc(avgFPR, avgRecall)
-
     plot_auprc(avgRecall, avgPrecision)
 
     print("Average Top-K value when threshold == 100: ", avgRecall[100])

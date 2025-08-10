@@ -309,9 +309,10 @@ class ADAGIO(PreComputeFeta):
         # dscript_predict(self.candidate_pairs, "DScript/model.safetensors", "a.out", self.seq_dict, 0.5)
 
         print("The graph originally has " + str(len(graph.edges)) + " edges")
-
+        
         if hasattr(self, "k_mat"): # originally to_add
             k = self.k_mat.default_factory()
+            print("adding {0} edges to each disease gene".format(k))
             for disease_gene in disease_genes:
                 to_add_pairs = self.add_edges_around_node(
                     disease_gene.name, k, variant)
@@ -349,16 +350,20 @@ class ADAGIO(PreComputeFeta):
         print("Inside prioritize function")
         if tissue_file:
             graph = reweight_graph_by_tissue(graph, tissue_file)
- 
+    
         graph = deepcopy(self.graph)
         if hasattr(self, "k_mat"):
             k_mat = self.construct_k_mat(graph, disease_genes)
             for disease_gene in disease_genes:
-                k_i = k_mat[disease_gene.name]
+                name = disease_gene.name
+                k_i = k_mat[name]
+                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, len(list(graph.neighbors(name)))))
                 if k_i > 0:
-                    pairs = self.add_edges_around_node(disease_gene.name,
+                    pairs = self.add_edges_around_node(name,
                                                     k_i,
                                                     variant)
+
+                    print("Total number of edges being added:", len(pairs))
                     for (i, j) in pairs:
                         graph.add_edge(self.rgmap[i],
                                     self.rgmap[j],

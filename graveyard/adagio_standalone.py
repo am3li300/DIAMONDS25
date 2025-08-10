@@ -225,6 +225,10 @@ print("'start': {0}\n'end': {1}\n'total time': {2}".format(start, end, end-start
 
 # STRING network
 """
+python3 main.py \
+  --network '../data/networks/STRING_protein_links_parsed.tsv' \
+  --genelist '../data/seed_nodes/schizophrenia_drug.txt' \
+  --out 'output.out'
 
 """
 
@@ -237,8 +241,8 @@ print("'start': {0}\n'end': {1}\n'total time': {2}".format(start, end, end-start
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitions/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/SZ_STRING_dale_merge/3_SZ_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/RA_STRING/3_RA_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/RA_STRING_constant_k_20/3_RA_cross_validation_0.out'
 """
 
 

@@ -448,17 +448,19 @@ def supervised_clustering(network_path, genelist_path):
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         start = time()
 
+        # comment out for disease gene clustering
+        model_file = open("adagio_model", "rb")
+        model = pickle.load(model_file)
+        graph = EdgeListGarbanzo(network_path, genelist_path)
+
         """
         Baseline ADAGIO - constant k for disease nodes only (k = 20)
         """
-        # graph = EdgeListGarbanzo(network_path, genelist_path)
         # print(len(graph.graph.edges))
         # model = ADAGIO()
         # model.setup(graph.graph)
         # model.set_add_edges_amount(20) # this will add edges to the graph
-        # model_file = open("../../adagio_model", "rb")
-        # model = pickle.load(model_file)
-        # predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for disease nodes only
@@ -473,7 +475,6 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         """
         constant k for all nodes (k = 20)
         """
-        # graph = EdgeListGarbanzo(network_path, genelist_path)
         # print(len(graph.graph.edges))
         # model_file = open(input("Enter file path to model: "), "rb")
         # model = pickle.load(model_file)
@@ -486,9 +487,9 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         # predictions = clustering(network_path, genelist_path, algorithm="louvain")
 
         """ 
-        supervised clustering
+        disease-gene clustering
         """
-        predictions = supervised_clustering(network_path, genelist_path)
+        # predictions = supervised_clustering(network_path, genelist_path)
 
 
         with open(out_path, "w") as f:
