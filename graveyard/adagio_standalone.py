@@ -241,8 +241,8 @@ python3 main.py \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitions/RA_STRING/3_RA_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/RA_STRING_constant_k_20/3_RA_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/allergy_STRING/3_allergy_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/allergy_STRING_adaptive_k/3_allergy_cross_validation_0.out'
 """
 
 

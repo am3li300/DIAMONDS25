@@ -44,6 +44,9 @@ def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
     partial_auc = np.trapezoid(tpr_seg, fpr_seg)
     return partial_auc / fpr_max
 
+"""
+only used by old TPR & FPR method
+"""
 def count_positives(file, threshold):
     trueP = falseP = 0
     for line in file:
