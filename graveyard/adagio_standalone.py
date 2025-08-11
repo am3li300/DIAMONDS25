@@ -242,7 +242,7 @@ python3 main.py \
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --genelist '../cross_validation/partitions/schizophrenia_STRING/3_schizophrenia_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/SZ_STRING_adaptive_k_disease_genes/3_SZ_cross_validation_0.out'
+  --out '../cross_validation/rankings/SZ_STRING_constant_k_20_disease_genes/3_SZ_cross_validation_0.out'
 """
 
 
