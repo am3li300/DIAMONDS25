@@ -241,8 +241,8 @@ python3 main.py \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitions/asthma_STRING/3_asthma_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/asthma_STRING_constant_k_20_disease_genes/3_asthma_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/alzheimers_STRING/3_alzheimers_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/alzheimers_STRING_adaptive_k/3_alzheimers_cross_validation_0.out'
 """
 
 
