@@ -241,8 +241,8 @@ python3 main.py \
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --genelist '../cross_validation/partitions/STRING/UC/3_UC_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/STRING_baseline/UC/3_UC_cross_validation_0.out'
+  --genelist '../cross_validation/partitions/STRING/hypertension/3_hypertension_new_seeds_0.txt' \
+  --out '../cross_validation/rankings/STRING_baseline/hypertension/3_hypertension_cross_validation_0.out'
 """
 
 
