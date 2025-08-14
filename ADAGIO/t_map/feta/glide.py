@@ -357,7 +357,7 @@ class ADAGIO(PreComputeFeta):
             for disease_gene in disease_genes:
                 name = disease_gene.name
                 k_i = k_mat[name]
-                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, len(list(graph.neighbors(name)))))
+                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, graph.degree(name)))
                 if k_i > 0:
                     pairs = self.add_edges_around_node(name,
                                                     k_i,
