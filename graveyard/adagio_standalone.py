@@ -242,7 +242,7 @@ python3 main.py \
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --genelist '../cross_validation/partitions/STRING/CHD/3_CHD_new_seeds_0.txt' \
-  --out '../cross_validation/rankings/STRING_baseline/CHD/3_CHD_cross_validation_0.out'
+  --out '../cross_validation/rankings/adaptive_k_cc/CHD/3_CHD_cross_validation_0.out'
 """
 
 
