@@ -102,7 +102,7 @@ def main(network_path, model_path):
         key=extract_index
     )
     n = len(gene_files)
-    print(gene_files)
+
     # use joblib to cross-validate in parallel
     jobs = min(n, max(1, int(input("Enter number of jobs to run in parallel: "))))
 
