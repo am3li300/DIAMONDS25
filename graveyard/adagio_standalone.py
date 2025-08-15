@@ -237,7 +237,7 @@ python3 main.py \
 
 """
 
-# cross validation
+# cross validation through main.py
 """
 python3 main.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
@@ -246,3 +246,10 @@ python3 main.py \
 """
 
 
+# cross validation through cross_validate.py
+
+"""
+python3 cross_validate.py \
+  --network '../data/networks/STRING_protein_links_parsed.tsv' \
+  --model 'adagio_model'
+"""
