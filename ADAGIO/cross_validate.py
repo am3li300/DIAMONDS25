@@ -42,6 +42,7 @@ from joblib import Parallel, delayed
 
 from collections import defaultdict
 import dill as pickle
+import re
 
 
 _MODEL = None
@@ -90,10 +91,18 @@ def main(network_path, model_path):
     # two-fold/three-fold, etc.
     folds = int(input("Enter number of folds for validation: "))
 
-    # get a list of all disease-gene files 
-    gene_files = sorted(os.path.join(partition_folder, e.name) for e in os.scandir(partition_folder) if "new_seeds" in e.name)
-    n = len(gene_files)
+    def extract_index(path):
+        # Grab the last number in the filename
+        match = re.search(r'(\d+)(?=\D*$)', os.path.basename(path))
+        return int(match.group(1))
 
+    # get a list of all disease-gene files 
+    gene_files = sorted(
+        (os.path.join(partition_folder, e.name) for e in os.scandir(partition_folder) if "new_seeds" in e.name),
+        key=extract_index
+    )
+    n = len(gene_files)
+    print(gene_files)
     # use joblib to cross-validate in parallel
     jobs = min(n, max(1, int(input("Enter number of jobs to run in parallel: "))))
 
@@ -134,7 +143,7 @@ def main(network_path, model_path):
         file_name = "{0}_{1}_cross_validation_{2}.out".format(folds, disease, indx)
         out_file = open(out_folder + file_name, 'w')
         for gene, score in ranking:
-            out_file.write("{0} {1}\n".format(gene.name, score))
+            out_file.write("{0}\t{1}\n".format(gene.name, score))
 
         out_file.close()
 
