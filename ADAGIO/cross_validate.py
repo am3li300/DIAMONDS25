@@ -12,6 +12,12 @@ all done :)
 
 """
 
+"""
+python3 cross_validate.py \
+  --network '../data/networks/STRING_protein_links_parsed.tsv' \
+  --model 'adagio_model'
+"""
+
 from t_map.garbanzo.edgelist import EdgeListGarbanzo
 from t_map.feta.glide import ADAGIO
 from t_map.gene.gene import Gene
@@ -115,7 +121,7 @@ def main(network_path, model_path):
 
     with Parallel(
         n_jobs=jobs,
-        backend="loky",
+        backend="loky", # threading
         batch_size=1,
         pre_dispatch="2*n_jobs",
 
