@@ -101,6 +101,10 @@ def main(network_path, model_path):
         (os.path.join(partition_folder, e.name) for e in os.scandir(partition_folder) if "new_seeds" in e.name),
         key=extract_index
     )
+    non_gene_files = sorted(
+        (os.path.join(partition_folder, e.name) for e in os.scandir(partition_folder) if "non_seeds" in e.name),
+        key=extract_index
+    )
     n = len(gene_files)
 
     # use joblib to cross-validate in parallel
@@ -137,19 +141,34 @@ def main(network_path, model_path):
     ) as parallel:
         rankings = parallel(delayed(_rank_from_paths)(choice, npath, gpath, indx) for (npath, gpath, indx) in jobspecs)
 
-    # save each ranking to cross_validation/rankings
-    out_folder = "../cross_validation/rankings/{0}/{1}/".format(method, disease)
+    ranking_out_folder = "../cross_validation/rankings/{0}/{1}/".format(method, disease)
+    label_out_folder = "../cross_validation/labels/{0}/{1}/".format(method, disease)
+
     for indx, ranking in rankings:
-        file_name = "{0}_{1}_cross_validation_{2}.out".format(folds, disease, indx)
-        out_file = open(out_folder + file_name, 'w')
+        # save each ranking to cross_validation/rankings
+        ranking_file_name = "{0}_{1}_cross_validation_{2}.out".format(folds, disease, indx)
+        ranking_out_file = open(ranking_out_folder + ranking_file_name, 'w')
+
+        # save each ranking labels to cross_validation/labels
+        label_file_name = "{0}_validation_labels_{1}".format(disease, indx)
+        label_out_file = open(label_out_folder + label_file_name, 'w')
+
+        # get seeds and nonseeds for current ranking
+        with open(gene_files[indx]) as f:
+            seeds = {line.strip() for line in f}
+
+        with open(non_gene_files[indx]) as f:
+            nonseeds = {line.strip() for line in f}
+
         for gene, score in ranking:
-            out_file.write("{0}\t{1}\n".format(gene.name, score))
+            ranking_out_file.write("{0}\t{1}\n".format(gene.name, score))
+            if gene in seeds:
+                continue
 
-        out_file.close()
-
-    """
-    add label functionality?
-    """
+            label_out_file.write("{0} {1} {2}\n".format(gene, score, 1 if gene in nonseeds else 0))
+            
+        ranking_out_file.close()
+        label_out_file.close()
 
     end_time = time()
     print("Total time:", end_time-start_time)
