@@ -46,19 +46,6 @@ def _init_model(model_path):
         with open(model_path, "rb") as f:
             _MODEL = pickle.load(f)
 
-def _rank_baseline(graph):
-    # uses the global _MODEL already loaded in the worker
-    ranking = sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
-    return ranking
-
-def _rank_adaptive_disease(graph):
-    ranking = sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
-    return ranking
-
-def _rank_adaptive_all(graph):
-    ranking = sorted(list(_MODEL.david_prioritize(1000, graph.graph, True)), key=lambda x: -x[1])
-    return ranking
-
 def _rank_from_paths(method_id, network_path, genelist_path, i):
     # Build the graph in the worker, not the parent
     graph = EdgeListGarbanzo(network_path, genelist_path)
@@ -156,46 +143,3 @@ def main(network_path, model_path):
 if __name__ == "__main__":
     args = parser.parse_args()
     main(args.network, args.model)
-
-
-
-
-
-
-    """
-    if choice == 0:
-        method = "STRING_baseline"
-        def baseline_helper(graph, i):
-            ranking = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
-            return (i, ranking)
-
-        rankings = Parallel(n_jobs=jobs)(delayed(baseline_helper)(graphs[i], i) for i in range(n))
-
-    elif choice == 1:
-        method = "adaptive_k_cc"
-        def adaptive_k_disease_helper(graph, i):
-            ranking = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
-            return (i, ranking)
-
-        rankings = Parallel(n_jobs=jobs)(delayed(adaptive_k_disease_helper)(graphs[i], i) for i in range(n))
-
-    elif choice == 2:
-        method = "adaptive_k_cc_all_genes"
-        def adaptive_k_all_helper(graph, i):
-            ranking = sorted(list(model.david_prioritize(1000, graph.graph, True)), key=lambda x: -x[1])
-            return (i, ranking)
-
-        rankings = Parallel(n_jobs=jobs)(delayed(adaptive_k_all_helper)(graphs[i], i) for i in range(n))
-
-    elif choice == 3:
-        method = "network_clustering"
-        pass
-    
-    elif choice == 4:
-        method = "disease_clustering_wip"
-        pass
-
-    else:
-        print("Invalid Method")
-        return 
-    """
