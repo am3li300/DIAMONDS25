@@ -92,7 +92,7 @@ def main(network_path, model_path):
     folds = int(input("Enter number of folds for validation: "))
 
     def extract_index(path):
-        # Grab the last number in the filename
+        # grab the last number in the filename
         match = re.search(r'(\d+)(?=\D*$)', os.path.basename(path))
         return int(match.group(1))
 
@@ -161,11 +161,12 @@ def main(network_path, model_path):
             nonseeds = {line.strip() for line in f}
 
         for gene, score in ranking:
-            ranking_out_file.write("{0}\t{1}\n".format(gene.name, score))
-            if gene in seeds:
+            name = gene.name
+            ranking_out_file.write("{0}\t{1}\n".format(name, score))
+            if name in seeds:
                 continue
 
-            label_out_file.write("{0} {1} {2}\n".format(gene, score, 1 if gene in nonseeds else 0))
+            label_out_file.write("{0} {1} {2}\n".format(name, score, 1 if name in nonseeds else 0))
             
         ranking_out_file.close()
         label_out_file.close()

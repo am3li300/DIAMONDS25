@@ -99,7 +99,7 @@ def plot_auprc(avgRecall, avgPrecision):
     print(f"AUPRC score: {auc_score:.4f}")
 
 
-def main():
+def positives():
     global PRC_RANDOM_Y
     """
     -numPos represents the number of true positives; how many genes in the ranking file trying to be recovered (not seeds)
@@ -210,4 +210,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    positives()
