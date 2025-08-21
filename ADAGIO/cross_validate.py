@@ -15,7 +15,13 @@ all done :)
 """
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --model 'adagio_model'
+  --model 'adagio_model' \
+  --disease 'allergy' \
+  --partition 'STRING' \
+  --source 'genetic' \
+  --method 0 \
+  --jobs 2 \
+  --folds 3
 """
 
 from t_map.garbanzo.edgelist import EdgeListGarbanzo
@@ -76,20 +82,23 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
 parser.add_argument('--model', '-m', type=str, required=True, help="Path to pickled model file")
+parser.add_argument('--disease', '-d', type=str, required=True, help="Disease to cross validate")
+parser.add_argument('--partition', '-p', type=str, required=True, help="Partition folder name (e.g. STRING)")
+parser.add_argument('--source', '-s', type=str, required=True, help="Drug or genetic data")
+parser.add_argument('--method', '-t', type=int, required=True,
+                    choices=[0, 1, 2, 3, 4],
+                    help="Ranking method: 0=baseline, 1=adaptive_k (seeds), 2=adaptive_k (all), 3=unsupervised, 4=disease-gene clustering")
 
-def main(network_path, model_path):
+parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of jobs to run in parallel")
+parser.add_argument('--folds', '-f', type=int, required=True, help="Cross validation folds (2-fold, 3-fold, etc.)")
+
+def main(network_path, model_path, disease, partition_name, source, choice, jobs, folds):
     start_time = time()
 
     _init_model(model_path)
-    disease = input("Enter name of disease: ")
 
-    # default partition folder for cross validation is cross_validation/partitions/STRING/disease
-    change_flag = input("STRING is default partition. Use different partition (Y/N)? ")
-    sub = input("Enter partition folder name: ") if change_flag[0].lower() == 'y' else "STRING"
-    partition_folder = "../cross_validation/partitions/{0}/{1}".format(sub, disease)
-
-    # two-fold/three-fold, etc.
-    folds = int(input("Enter number of folds for validation: "))
+    source = source.lower()
+    partition_folder = "../cross_validation/{0}/partitions/{1}/{2}".format(source, partition_name, disease)
 
     def extract_index(path):
         # grab the last number in the filename
@@ -107,20 +116,6 @@ def main(network_path, model_path):
     )
     n = len(gene_files)
 
-    # use joblib to cross-validate in parallel
-    jobs = min(n, max(1, int(input("Enter number of jobs to run in parallel: "))))
-
-    print("-------------------------------------------")
-    print("              Select Method                ")
-    print("-------------------------------------------")
-    print(" 0) Baseline (constant k=20)")
-    print(" 1) Adaptive k (disease-genes only)")
-    print(" 2) Adaptive k (all genes)")
-    print(" 3) Unsupervised network clustering")
-    print(" 4) Disease-gene clustering")
-    print("-------------------------------------------")
-
-    choice = int(input())
     method_mapping = {0: "STRING_baseline",
                       1: "adaptive_k_cc",
                       2: "adaptive_k_cc_all_genes",
@@ -141,8 +136,8 @@ def main(network_path, model_path):
     ) as parallel:
         rankings = parallel(delayed(_rank_from_paths)(choice, npath, gpath, indx) for (npath, gpath, indx) in jobspecs)
 
-    ranking_out_folder = "../cross_validation/rankings/{0}/{1}/".format(method, disease)
-    label_out_folder = "../cross_validation/labels/{0}/{1}/".format(method, disease)
+    ranking_out_folder = "../cross_validation/{0}/rankings/{1}/{2}/".format(source, method, disease)
+    label_out_folder = "../cross_validation/{0}/labels/{1}/{2}/".format(source, method, disease)
 
     for indx, ranking in rankings:
         # save each ranking to cross_validation/rankings
@@ -177,4 +172,4 @@ def main(network_path, model_path):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    main(args.network, args.model)
+    main(args.network, args.model, args.disease, args.partition, args.source, args.method, args.jobs, args.folds)

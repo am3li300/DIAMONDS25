@@ -251,5 +251,11 @@ python3 main.py \
 """
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --model 'adagio_model'
+  --model 'adagio_model' \
+  --disease 'allergy' \
+  --partition 'STRING' \
+  --source 'genetic' \
+  --method 0 \
+  --jobs 2 \
+  --folds 3
 """
