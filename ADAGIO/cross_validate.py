@@ -19,7 +19,7 @@ python3 cross_validate.py \
   --disease 'arthritis' \
   --partition 'STRING' \
   --source 'genetic' \
-  --method 1 \
+  --method 0 \
   --jobs 2 \
   --folds 3
 """
