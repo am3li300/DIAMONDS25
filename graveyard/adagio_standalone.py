@@ -255,7 +255,7 @@ python3 cross_validate.py \
   --disease 'allergy' \
   --partition 'STRING' \
   --source 'genetic' \
-  --method 0 \
+  --method 1 \
   --jobs 2 \
   --folds 3
 """
