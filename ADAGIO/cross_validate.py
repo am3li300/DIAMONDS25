@@ -16,7 +16,7 @@ all done :)
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model 'adagio_model' \
-  --disease 'MS' \
+  --disease 'psoriasis' \
   --partition 'STRING' \
   --source 'genetic' \
   --method 0 \
