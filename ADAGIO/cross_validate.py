@@ -50,6 +50,10 @@ from collections import defaultdict
 import dill as pickle
 import re
 
+from disease_clustering import cluster_disease_genes
+from disease_clustering import merge_cluster_rankings
+from disease_clustering import double_merge
+
 
 _MODEL = None
 
@@ -69,10 +73,20 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
         return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
 
     elif method_id == 2:
-        return i, sorted(list(_MODEL.david_prioritize(1000, graph.graph, True)), key=lambda x: -x[1])
+        disease_genes = set(graph.genes)
+        disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
 
-    elif method_id == 3:
-        pass
+        cluster_rankings = []
+        for cluster in disease_clusters:
+            seeds = [Gene(name=g) for g in cluster if g in disease_genes]
+            if seeds:
+                cluster_rankings.append(sorted(list(_MODEL.prioritize(seeds, graph.graph)), key=lambda x: -x[1]))
+
+        og_ranking = sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
+
+        final_cluster_ranking = merge_cluster_rankings(cluster_rankings, disease_genes)
+
+        return i, double_merge(og_ranking, final_cluster_ranking)
 
     else:
         # method_id == 4
@@ -87,7 +101,7 @@ parser.add_argument('--partition', '-p', type=str, required=True, help="Partitio
 parser.add_argument('--source', '-s', type=str, required=True, help="Drug or genetic data")
 parser.add_argument('--method', '-t', type=int, required=True,
                     choices=[0, 1, 2, 3, 4],
-                    help="Ranking method: 0=baseline, 1=adaptive_k (seeds), 2=adaptive_k (all), 3=unsupervised, 4=disease-gene clustering")
+                    help="Ranking method: 0=baseline, 1=adaptive_k_cc (seeds), 2=disease-gene clustering")
 
 parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of jobs to run in parallel")
 parser.add_argument('--folds', '-f', type=int, required=True, help="Cross validation folds (2-fold, 3-fold, etc.)")
@@ -118,9 +132,7 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
 
     method_mapping = {0: "STRING_baseline",
                       1: "adaptive_k_cc",
-                      2: "adaptive_k_cc_all_genes",
-                      3: "network_clustering",
-                      4: "disease_clustering_wip"}
+                      2: "disease_clustering"}
 
     method = method_mapping[choice]
 
