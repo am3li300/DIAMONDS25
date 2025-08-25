@@ -89,8 +89,7 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
         return i, double_merge(og_ranking, final_cluster_ranking)
 
     else:
-        # method_id == 4
-        pass
+        return i, []
 
 
 parser = argparse.ArgumentParser()
