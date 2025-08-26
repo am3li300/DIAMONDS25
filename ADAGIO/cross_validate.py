@@ -16,10 +16,10 @@ all done :)
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'RA' \
+  --disease 'SLE' \
   --partition 'STRING' \
   --source 'genetic' \
-  --method 0 \
+  --method 1 \
   --jobs 2 \
   --folds 3
 """
