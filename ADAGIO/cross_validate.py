@@ -22,6 +22,17 @@ python3 cross_validate.py \
   --method 1 \
   --jobs 2 \
   --folds 3
+
+
+python3 cross_validate.py \
+  --network '../data/networks/STRING_protein_links_parsed.tsv' \
+  --model '../../adagio_model' \
+  --disease 'allergy' \
+  --partition 'STRING' \
+  --source 'drug' \
+  --method 2 \
+  --jobs 1 \
+  --folds 3
 """
 
 from t_map.garbanzo.edgelist import EdgeListGarbanzo
