@@ -2,6 +2,7 @@ import networkx as nx
 import markov_clustering as mc
 from scipy.sparse import csr_matrix
 import numpy as np
+import pcst_fast
 
 
 ############################## Internal Helpers ################################
@@ -18,7 +19,7 @@ def build_steiner_tree(full_graph, disease_genes):
 
         costs = np.fromiter((full_graph[u][v]['cost'] for u,v in full_graph.edges()), dtype=np.float64)
         prizes = np.zeros(len(idx), dtype=np.float64)
-        prizes[[idx[g] for g in disease_genes]] = 1e6      # force inclusion
+        prizes[[idx[g.name] for g in disease_genes]] = 1e6      # force inclusion
 
         
         nodes_kept, edges_kept = pcst_fast.pcst_fast(
