@@ -37,7 +37,7 @@ def plot_auprc(avgRecall, avgPrecision, save_dir=None):
     plt.legend()
     if save_dir:
         os.makedirs(save_dir, exist_ok=True)
-        plt.savefig(os.path.join(save_dir, "{0}_PRC.png"))
+        plt.savefig(os.path.join(save_dir, "{0}_PRC.png".format(DISEASE)))
         plt.close()
 
     else:
@@ -155,7 +155,7 @@ def positives(label_directory, numPos, numGenes, disease, source, method):
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
 
-    graph_dir = "cross_validation/{0}/graphs/{1}/{2}".format(source, method, DISEASE)
+    graph_dir = "../cross_validation/{0}/graphs/{1}/{2}".format(source, method, DISEASE)
     plot_auroc(avgFPR, avgRecall, graph_dir)
     plot_auprc(avgRecall, avgPrecision, graph_dir)
 
