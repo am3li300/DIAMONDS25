@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 PRC_RANDOM_Y = float("inf")
+DISEASE = ""
 
 ############################ Internal Helpers ##################################
-def plot_auroc(avgFPR, avgRecall):
+def plot_auroc(avgFPR, avgRecall, save_dir=None):
     plt.plot(avgFPR, avgRecall, label="Mean ROC curve")
     plt.axvline(0.10, ls='--', color='grey', alpha=0.6)   # t-AUROC cutoff
     plt.plot([0, 1], [0, 1], 'k--', label='Random')
@@ -13,13 +14,19 @@ def plot_auroc(avgFPR, avgRecall):
     plt.ylabel("True Positive Rate")
     plt.title("Average ROC Curve Across Folds")
     plt.legend()
-    plt.show()
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
+        plt.savefig(os.path.join(save_dir, "{0}_ROC.png".format(DISEASE)))
+        plt.close()
+
+    else:
+        plt.show()
 
     # Trapezoidal Rule to get area under curve
     auc_score = np.trapezoid(avgRecall, avgFPR)
     print(f"AUROC score: {auc_score:.4f}")
 
-def plot_auprc(avgRecall, avgPrecision):
+def plot_auprc(avgRecall, avgPrecision, save_dir=None):
     plt.plot(avgRecall, avgPrecision, label="Mean PRC curve")
     plt.axhline(y=PRC_RANDOM_Y, linestyle='--', color='grey', alpha=0.6, label="Random")
     plt.xlabel("Recall")
@@ -28,7 +35,13 @@ def plot_auprc(avgRecall, avgPrecision):
     plt.xlim(0, 1)
     plt.ylim(0, 1)
     plt.legend()
-    plt.show()
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
+        plt.savefig(os.path.join(save_dir, "{0}_PRC.png"))
+        plt.close()
+
+    else:
+        plt.show()
 
     # Trapezoidal Rule to get area under curve
     auc_score = np.trapezoid(avgPrecision, avgRecall)
@@ -73,8 +86,9 @@ def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
 
 ################################ actually use ##################################
 
-def positives(label_directory, numPos, numGenes):
+def positives(label_directory, numPos, numGenes, disease, source, method):
     global PRC_RANDOM_Y
+    global DISEASE
     """
     -numPos represents the number of true positives; how many genes in the ranking file trying to be recovered (not seeds)
     -numNeg represents the number of true negatives; includes both genes that were never disease genes and disease genes that were used as seeds
@@ -85,6 +99,7 @@ def positives(label_directory, numPos, numGenes):
     numNeg = numGenes - numPos
 
     PRC_RANDOM_Y = numPos/(numPos+numNeg)
+    DISEASE = disease
 
     recall = [0]*(numGenes + 1) # same as TPR
     FPR = [0]*(numGenes + 1)
@@ -140,8 +155,9 @@ def positives(label_directory, numPos, numGenes):
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
 
-    plot_auroc(avgFPR, avgRecall)
-    plot_auprc(avgRecall, avgPrecision)
+    graph_dir = "cross_validation/{0}/graphs/{1}/{2}".format(source, method, DISEASE)
+    plot_auroc(avgFPR, avgRecall, graph_dir)
+    plot_auprc(avgRecall, avgPrecision, graph_dir)
 
     print("Average Top-K value when threshold == 100: ", avgRecall[100])
     print("Average Top-K value when threshold == 250: ", avgRecall[250])
@@ -151,5 +167,5 @@ def positives(label_directory, numPos, numGenes):
 
 def count_lines(file):
     with open(file, "r") as f:
-        numLines = sum(1 for line in f)
+        numLines = sum(1 for line in f if line.strip())
         return numLines

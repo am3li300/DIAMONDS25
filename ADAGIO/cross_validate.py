@@ -9,7 +9,6 @@ python3 cross_validate.py \
   --jobs 2 \
   --folds 3
 
-
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '../../adagio_model' \
@@ -50,7 +49,7 @@ from calculate_metrics import count_lines
 
 
 _MODEL = None
-STRING_NUM_GENES = 11882
+_STRING_NUM_GENES = 11882
 
 def _init_model(model_path):
     global _MODEL
@@ -72,9 +71,8 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
 
     # disease clustering
     elif method_id == 2:
-        disease_genes = set([gene.name for gene in graph.genes])
+        disease_genes = set(gene.name for gene in graph.genes)
         disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
-
         cluster_rankings = []
         for cluster in disease_clusters:
             seeds = [Gene(name=g) for g in cluster if g in disease_genes]
@@ -176,13 +174,12 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
         ranking_out_file.close()
         label_out_file.close()
 
+    # calculate validation metrics and produce graphs
+    numPos = count_lines(f"{partition_folder}/{folds}_{disease}_non_seeds_0.txt")
+    positives(label_out_folder, numPos, _STRING_NUM_GENES, disease, source, method)
+
     end_time = time()
     print("Total time:", end_time-start_time)
-
-    # calculate auroc and stuff
-    numPos = count_lines(f"{partition_folder}/{folds}_{disease}_non_seeds_0.txt")
-    positives(label_out_folder, numPos, STRING_NUM_GENES)
-
 
 
 if __name__ == "__main__":
