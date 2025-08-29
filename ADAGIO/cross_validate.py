@@ -2,7 +2,7 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'SLE' \
+  --disease 'diabetes_set' \
   --partition 'STRING' \
   --source 'genetic' \
   --method 1 \
@@ -27,19 +27,13 @@ from t_map.gene.gene import Gene
 
 import argparse
 from time import time
-# from heapq import heapify, heappush, heappop
 
 import networkx as nx
-# from scipy.sparse import csr_matrix
-# import markov_clustering as mc
-
-# import igraph as ig
 
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# import pcst_fast
 import numpy as np
 from joblib import Parallel, delayed
 
