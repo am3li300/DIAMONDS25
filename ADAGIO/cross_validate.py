@@ -1,18 +1,4 @@
 """
-need to get network OR model pickle
-need name of disease
-need partitions subfolder name, default can be STRING
-need method subfolder name
-need to get seed genes and make partitions OR path to partitions folder
-call and run adagio the specified number of times, write output to rankings/method subfolder/disease
-label the rankings based on partitions, write to labels/method subfolder/disease
-call positives on the labels, will have to manually save the graphs
-maybe write positives output to a designated output file with the disease and method name, use write method that lets you add to file instead of overwriting
-all done :)
-
-"""
-
-"""
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
@@ -65,8 +51,12 @@ from disease_clustering import cluster_disease_genes
 from disease_clustering import merge_cluster_rankings
 from disease_clustering import double_merge
 
+from calculate_metrics import positives
+from calculate_metrics import count_lines
+
 
 _MODEL = None
+STRING_NUM_GENES = 11882
 
 def _init_model(model_path):
     global _MODEL
@@ -77,14 +67,18 @@ def _init_model(model_path):
 def _rank_from_paths(method_id, network_path, genelist_path, i):
     # Build the graph in the worker, not the parent
     graph = EdgeListGarbanzo(network_path, genelist_path)
+
+    # baseline
     if method_id == 0:
         return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
 
+    # adaptive k cc
     elif method_id == 1:
         return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
 
+    # disease clustering
     elif method_id == 2:
-        disease_genes = set(graph.genes)
+        disease_genes = set([gene.name for gene in graph.genes])
         disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
 
         cluster_rankings = []
@@ -158,17 +152,17 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
     ) as parallel:
         rankings = parallel(delayed(_rank_from_paths)(choice, npath, gpath, indx) for (npath, gpath, indx) in jobspecs)
 
-    ranking_out_folder = "../cross_validation/{0}/rankings/{1}/{2}/".format(source, method, disease)
-    label_out_folder = "../cross_validation/{0}/labels/{1}/{2}/".format(source, method, disease)
+    ranking_out_folder = "../cross_validation/{0}/rankings/{1}/{2}".format(source, method, disease)
+    label_out_folder = "../cross_validation/{0}/labels/{1}/{2}".format(source, method, disease)
 
     for indx, ranking in rankings:
         # save each ranking to cross_validation/rankings
         ranking_file_name = "{0}_{1}_cross_validation_{2}.out".format(folds, disease, indx)
-        ranking_out_file = open(ranking_out_folder + ranking_file_name, 'w')
+        ranking_out_file = open(ranking_out_folder + "/" + ranking_file_name, 'w')
 
         # save each ranking labels to cross_validation/labels
         label_file_name = "{0}_validation_labels_{1}".format(disease, indx)
-        label_out_file = open(label_out_folder + label_file_name, 'w')
+        label_out_file = open(label_out_folder + "/" + label_file_name, 'w')
 
         # get seeds and nonseeds for current ranking
         with open(gene_files[indx]) as f:
@@ -190,6 +184,11 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
 
     end_time = time()
     print("Total time:", end_time-start_time)
+
+    # calculate auroc and stuff
+    numPos = count_lines(f"{partition_folder}/{folds}_{disease}_non_seeds_0.txt")
+    positives(label_out_folder, numPos, STRING_NUM_GENES)
+
 
 
 if __name__ == "__main__":

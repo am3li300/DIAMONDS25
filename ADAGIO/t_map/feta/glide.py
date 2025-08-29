@@ -308,11 +308,11 @@ class ADAGIO(PreComputeFeta):
         """
         # dscript_predict(self.candidate_pairs, "DScript/model.safetensors", "a.out", self.seq_dict, 0.5)
 
-        print("The graph originally has " + str(len(graph.edges)) + " edges")
+        # print("The graph originally has " + str(len(graph.edges)) + " edges")
         
         if hasattr(self, "k_mat"): # originally to_add
             k = self.k_mat.default_factory()
-            print("adding {0} edges to each disease gene".format(k))
+            # print("adding {0} edges to each disease gene".format(k))
             for disease_gene in disease_genes:
                 to_add_pairs = self.add_edges_around_node(
                     disease_gene.name, k, variant)
@@ -330,7 +330,7 @@ class ADAGIO(PreComputeFeta):
                     graph.add_edge(
                         self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
 
-        print("The graph now has " + str(len(graph.edges)) + " edges")
+        # print("The graph now has " + str(len(graph.edges)) + " edges")
         if hasattr(self, '__dada'):
             return self.__dada.prioritize(disease_genes, graph)
         else:
