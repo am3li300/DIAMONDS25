@@ -2,10 +2,10 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'diabetes_set' \
+  --disease 'arthritis' \
   --partition 'STRING' \
-  --source 'genetic' \
-  --method 1 \
+  --source 'drug' \
+  --method 2 \
   --jobs 2 \
   --folds 3
 
