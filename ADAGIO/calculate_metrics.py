@@ -159,8 +159,8 @@ def positives(label_directory, numPos, numGenes, disease, source, method):
     plot_auroc(avgFPR, avgRecall, graph_dir)
     plot_auprc(avgRecall, avgPrecision, graph_dir)
 
-    print("Average Top-K value when threshold == 100: ", avgRecall[100])
-    print("Average Top-K value when threshold == 250: ", avgRecall[250])
+    print("Average Top-K value when threshold == 100:", avgRecall[100])
+    print("Average Top-K value when threshold == 250:", avgRecall[250])
 
     t_auroc = compute_truncated_auroc(avgFPR, avgRecall, fpr_max=0.10)
     print(f"Truncated AUROC (FPR ≤ 0.10): {t_auroc}")
