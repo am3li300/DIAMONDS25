@@ -155,7 +155,7 @@ def positives(label_directory, numPos, numGenes, disease, source, method):
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
 
-    graph_dir = "../cross_validation/{0}/graphs/{1}/{2}".format(source, method, DISEASE)
+    graph_dir = "../cross_validation/{0}/graphs/{1}".format(source, method)
     plot_auroc(avgFPR, avgRecall, graph_dir)
     plot_auprc(avgRecall, avgPrecision, graph_dir)
 
