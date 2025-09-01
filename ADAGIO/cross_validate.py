@@ -69,7 +69,7 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
     elif method_id == 1:
         return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
 
-    # disease clustering
+    # disease clustering with double merge
     elif method_id == 2:
         disease_genes = set(gene.name for gene in graph.genes)
         disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
@@ -84,6 +84,18 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
         final_cluster_ranking = merge_cluster_rankings(cluster_rankings, disease_genes)
 
         return i, double_merge(og_ranking, final_cluster_ranking)
+        
+    # disease clustering
+    elif method_id == 3:
+        disease_genes = set(gene.name for gene in graph.genes)
+        disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
+        cluster_rankings = []
+        for cluster in disease_clusters:
+            seeds = [Gene(name=g) for g in cluster if g in disease_genes]
+            if seeds:
+                cluster_rankings.append(sorted(list(_MODEL.prioritize(seeds, graph.graph)), key=lambda x: -x[1]))
+
+        return merge_cluster_rankings(cluster_rankings, disease_genes)
 
     else:
         return i, []
@@ -128,7 +140,8 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
 
     method_mapping = {0: "STRING_baseline",
                       1: "adaptive_k_cc",
-                      2: "disease_clustering"}
+                      2: "disease_clustering_double_merge",
+                      3: "disease_clustering"}
 
     method = method_mapping[choice]
 
