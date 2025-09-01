@@ -2,11 +2,11 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'SZ' \
+  --disease 'allergy' \
   --partition 'STRING' \
   --source 'drug' \
-  --method 2 \
-  --jobs 1 \
+  --method 3 \
+  --jobs 2 \
   --folds 3
 
 python3 cross_validate.py \
@@ -95,7 +95,7 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
             if seeds:
                 cluster_rankings.append(sorted(list(_MODEL.prioritize(seeds, graph.graph)), key=lambda x: -x[1]))
 
-        return merge_cluster_rankings(cluster_rankings, disease_genes)
+        return i, merge_cluster_rankings(cluster_rankings, disease_genes)
 
     else:
         return i, []
