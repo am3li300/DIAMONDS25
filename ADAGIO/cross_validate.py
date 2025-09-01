@@ -2,7 +2,7 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'allergy' \
+  --disease 'alzheimers' \
   --partition 'STRING' \
   --source 'drug' \
   --method 3 \
@@ -69,8 +69,8 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
     elif method_id == 1:
         return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
 
-    # disease clustering with double merge
-    elif method_id == 2:
+    # disease clustering variants
+    elif method_id in [2, 3]:
         disease_genes = set(gene.name for gene in graph.genes)
         disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
         cluster_rankings = []
@@ -78,24 +78,13 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
             seeds = [Gene(name=g) for g in cluster if g in disease_genes]
             if seeds:
                 cluster_rankings.append(sorted(list(_MODEL.prioritize(seeds, graph.graph)), key=lambda x: -x[1]))
-
-        og_ranking = sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
 
         final_cluster_ranking = merge_cluster_rankings(cluster_rankings, disease_genes)
+        if method_id == 3:
+            return i, final_cluster_ranking
 
+        og_ranking = sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
         return i, double_merge(og_ranking, final_cluster_ranking)
-        
-    # disease clustering
-    elif method_id == 3:
-        disease_genes = set(gene.name for gene in graph.genes)
-        disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
-        cluster_rankings = []
-        for cluster in disease_clusters:
-            seeds = [Gene(name=g) for g in cluster if g in disease_genes]
-            if seeds:
-                cluster_rankings.append(sorted(list(_MODEL.prioritize(seeds, graph.graph)), key=lambda x: -x[1]))
-
-        return i, merge_cluster_rankings(cluster_rankings, disease_genes)
 
     else:
         return i, []
