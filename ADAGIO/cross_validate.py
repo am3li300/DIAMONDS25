@@ -2,11 +2,11 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'obesity' \
+  --disease 'SZ' \
   --partition 'STRING' \
   --source 'drug' \
   --method 2 \
-  --jobs 2 \
+  --jobs 1 \
   --folds 3
 
 python3 cross_validate.py \
