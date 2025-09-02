@@ -2,7 +2,7 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'arthritis' \
+  --disease 'COPD' \
   --partition 'STRING' \
   --source 'drug' \
   --method 3 \
