@@ -2,9 +2,9 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'diabetes_set' \
+  --disease 'allergy' \
   --partition 'STRING' \
-  --source 'drug' \
+  --source 'genetic' \
   --method 3 \
   --jobs 1 \
   --folds 3
@@ -73,12 +73,18 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
     elif method_id in [2, 3]:
         disease_genes = set(gene.name for gene in graph.genes)
         disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
+        print("Number of clusters:", len(disease_clusters))
         cluster_rankings = []
+        garbage = 0
         for cluster in disease_clusters:
             seeds = [Gene(name=g) for g in cluster if g in disease_genes]
             if seeds:
                 cluster_rankings.append(sorted(list(_MODEL.prioritize(seeds, graph.graph)), key=lambda x: -x[1]))
 
+            else:
+                garbage += 1
+
+        print("Number of clusters thrown away:", garbage)
         final_cluster_ranking = merge_cluster_rankings(cluster_rankings, disease_genes)
         if method_id == 3:
             return i, final_cluster_ranking
