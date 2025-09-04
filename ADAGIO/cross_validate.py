@@ -2,7 +2,7 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'BD' \
+  --disease 'cardiac_arrhythmia' \
   --partition 'STRING' \
   --source 'genetic' \
   --method 3 \
