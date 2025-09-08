@@ -449,7 +449,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         start = time()
 
         # comment out for disease gene clustering
-        model_file = open("adagio_model", "rb")
+        model_file = open("/Users/dkyee/Desktop/adagio_model", "rb")
         model = pickle.load(model_file)
         graph = EdgeListGarbanzo(network_path, genelist_path)
 
@@ -459,9 +459,9 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         predictions = sorted(list(model.prioritize(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
 
         """
-        adaptive k for disease nodes only
+        adaptive k for disease nodes only | method=1: CC; method=2: CC + high degree penalize
         """
-        # predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: x[1], reverse=True)
+        # predictions = sorted(list(model.david_prioritize_2(graph.genes, graph.graph, 2)), key=lambda x: x[1], reverse=True)
 
         """
         adaptive k for all nodes

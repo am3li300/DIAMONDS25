@@ -330,7 +330,7 @@ class ADAGIO(PreComputeFeta):
                     graph.add_edge(
                         self.rgmap[i], self.rgmap[j], weight=self.gmat[i][j])
 
-        # print("The graph now has " + str(len(graph.edges)) + " edges")
+        print("The graph now has " + str(len(graph.edges)) + " edges")
         if hasattr(self, '__dada'):
             return self.__dada.prioritize(disease_genes, graph)
         else:
@@ -343,6 +343,7 @@ class ADAGIO(PreComputeFeta):
     """
     def david_prioritize_2(self, disease_genes: List[Gene],
                    graph: Union[nx.Graph, None],
+                   method: int = 1,
                    tissue_file: Optional[str] = None,
                    variant: str = "none",
                    **kwargs) -> Set[Tuple[Gene, float]]:
@@ -354,10 +355,15 @@ class ADAGIO(PreComputeFeta):
         graph = deepcopy(self.graph)
         if hasattr(self, "k_mat"):
             k_mat = self.construct_k_mat(graph, disease_genes)
+            max_degree = max(graph.degree(gene) for gene in graph.nodes)
             for disease_gene in disease_genes:
                 name = disease_gene.name
                 k_i = k_mat[name]
-                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, graph.degree(name)))
+                deg = graph.degree(name)
+                if method == 2:
+                    k_i = floor(k_i * (1 - deg / max_degree))
+
+                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, deg))
                 if k_i > 0:
                     pairs = self.add_edges_around_node(name,
                                                     k_i,

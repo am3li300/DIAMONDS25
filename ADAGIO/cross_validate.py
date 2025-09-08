@@ -2,10 +2,10 @@
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'SZ' \
+  --disease 'allergy' \
   --partition 'STRING' \
-  --source 'genetic' \
-  --method 3 \
+  --source 'drug' \
+  --method 1.1 \
   --jobs 1 \
   --folds 3
 
@@ -47,6 +47,12 @@ from disease_clustering import double_merge
 from calculate_metrics import positives
 from calculate_metrics import count_lines
 
+def int_or_float(num: str):
+    try:
+        return int(num)
+
+    except:
+        return float(num)
 
 _MODEL = None
 _STRING_NUM_GENES = 11882
@@ -66,8 +72,9 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
         return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
 
     # adaptive k cc
-    elif method_id == 1:
-        return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph)), key=lambda x: -x[1])
+    elif method_id in [1, 1.1]:
+        variant = 1 if method_id == 1 else 2
+        return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph, variant)), key=lambda x: -x[1])
 
     # disease clustering variants
     elif method_id in [2, 3]:
@@ -102,9 +109,9 @@ parser.add_argument('--model', '-m', type=str, required=True, help="Path to pick
 parser.add_argument('--disease', '-d', type=str, required=True, help="Disease to cross validate")
 parser.add_argument('--partition', '-p', type=str, required=True, help="Partition folder name (e.g. STRING)")
 parser.add_argument('--source', '-s', type=str, required=True, help="Drug or genetic data")
-parser.add_argument('--method', '-t', type=int, required=True,
-                    choices=[0, 1, 2, 3, 4],
-                    help="Ranking method: 0=baseline, 1=adaptive_k_cc (seeds), 2=disease-gene clustering")
+parser.add_argument('--method', '-t', type=int_or_float, required=True,
+                    choices=[0, 1, 1.1, 2, 3, 4],
+                    help="Ranking method: 0=baseline, 1.x=adaptive_k, 2=disease-gene clustering")
 
 parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of jobs to run in parallel")
 parser.add_argument('--folds', '-f', type=int, required=True, help="Cross validation folds (2-fold, 3-fold, etc.)")
@@ -135,6 +142,7 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
 
     method_mapping = {0: "STRING_baseline",
                       1: "adaptive_k_cc",
+                      1.1: "adaptive_k_cc_degree",
                       2: "disease_clustering_double_merge",
                       3: "disease_clustering"}
 
