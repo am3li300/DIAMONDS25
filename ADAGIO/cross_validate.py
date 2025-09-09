@@ -71,12 +71,12 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
     if method_id == 0:
         return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
 
-    # adaptive k cc
+    # adaptive k with variants
     elif method_id in [1, 1.1]:
         variant = 1 if method_id == 1 else 2
         return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph, variant)), key=lambda x: -x[1])
 
-    # disease clustering variants
+    # disease clustering with variants
     elif method_id in [2, 3]:
         disease_genes = set(gene.name for gene in graph.genes)
         disease_clusters = cluster_disease_genes(graph.graph, disease_genes)
