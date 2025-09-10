@@ -1,21 +1,11 @@
 """
 python3 cross_validate.py \
   --network '../data/networks/STRING_protein_links_parsed.tsv' \
-  --model '/Users/dkyee/Desktop/adagio_model' \
-  --disease 'allergy' \
-  --partition 'STRING' \
-  --source 'drug' \
-  --method 1.1 \
-  --jobs 1 \
-  --folds 3
-
-python3 cross_validate.py \
-  --network '../data/networks/STRING_protein_links_parsed.tsv' \
   --model '../../adagio_model' \
   --disease 'allergy' \
   --partition 'STRING' \
   --source 'drug' \
-  --method 2 \
+  --method 1.1 \
   --jobs 1 \
   --folds 3
 """
