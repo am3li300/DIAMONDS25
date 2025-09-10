@@ -126,20 +126,30 @@ class ADAGIO(PreComputeFeta):
     """
     adaptive k matrix
     """
-    def construct_k_mat(self, graph, genes: List[Gene]) -> dict[str, int]:
+    def construct_k_mat(self, variant, graph, genes: List[Gene]) -> dict[str, int]:
         nodes = set(graph.nodes)
-        total_sum = sum(graph.degree[node] for node in nodes)
-        avg_degree = total_sum//len(nodes)
+        avg_degree = graph.number_of_edges()*2//len(nodes)
+        max_degree = max(graph.degree(gene) for gene in graph.nodes)
         max_edges_to_add = defaultdict(int)
 
         print("Number of queried genes:", len(genes))
         subset = [node.name for node in genes if node.name in nodes]
         print("Number of queried genes in graph:", len(subset))
 
+        # penalize high degrees only
+        if variant == 3:
+            for name in subset:
+                max_edges_to_add[name] = floor(avg_degree * (1 - graph.degree(name) / max_degree))
+
+            return max_edges_to_add
+        
         clustering_coefficients = nx.clustering(graph, nodes=subset)
         for name in subset:
-            # adaptive k function
+            # penalize high clustering coefficients
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
+            if variant == 2:
+                # also penalize high degrees
+                max_edges_to_add[name] = floor(max_edges_to_add[name] * (1 - graph.degree(name) / max_degree))
 
         return max_edges_to_add
 
@@ -148,8 +158,7 @@ class ADAGIO(PreComputeFeta):
     """
     def get_k_value_for_node(self, graph, node):
         nodes = list(graph.nodes)
-        total_sum = sum(graph.degree[gene] for gene in nodes)
-        avg_degree = total_sum//len(nodes)
+        avg_degree = graph.number_of_edges()*2//len(nodes)
         return floor(avg_degree*(1-nx.clustering(graph, node.name)))
 
     def add_new_edges(self, global_new_edges_percentage: float,
@@ -354,16 +363,11 @@ class ADAGIO(PreComputeFeta):
     
         graph = deepcopy(self.graph)
         if hasattr(self, "k_mat"):
-            k_mat = self.construct_k_mat(graph, disease_genes)
-            max_degree = max(graph.degree(gene) for gene in graph.nodes)
+            k_mat = self.construct_k_mat(method, graph, disease_genes)
             for disease_gene in disease_genes:
                 name = disease_gene.name
                 k_i = k_mat[name]
-                deg = graph.degree(name)
-                if method == 2:
-                    k_i = floor(k_i * (1 - deg / max_degree))
-
-                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, deg))
+                print("{0} k value: {1} | Number of edges: {2}".format(name, k_i, graph.degree(name)))
                 if k_i > 0:
                     pairs = self.add_edges_around_node(name,
                                                     k_i,
@@ -394,7 +398,7 @@ class ADAGIO(PreComputeFeta):
         graph = deepcopy(self.graph)
         genes = [Gene(name=node) for node in graph.nodes]
         if max_threshold > 0:
-            k_mat = self.construct_k_mat(graph, genes) if adaptive_k else defaultdict(lambda: float("inf"))
+            k_mat = self.construct_k_mat(1, graph, genes) if adaptive_k else defaultdict(lambda: float("inf"))
             indexes = self._get_sorted_similarity_indexes()
             for i, j in indexes:
                 node_indx1 = self.rgmap[i] # string names

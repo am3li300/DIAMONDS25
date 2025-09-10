@@ -4,8 +4,8 @@ python3 cross_validate.py \
   --model '../../adagio_model' \
   --disease 'allergy' \
   --partition 'STRING' \
-  --source 'genetic' \
-  --method 1.1 \
+  --source 'drug' \
+  --method 1.2 \
   --jobs 1 \
   --folds 3
 """
@@ -62,8 +62,16 @@ def _rank_from_paths(method_id, network_path, genelist_path, i):
         return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
 
     # adaptive k with variants
-    elif method_id in [1, 1.1]:
-        variant = 1 if method_id == 1 else 2
+    elif method_id in [1, 1.1, 1.2]:
+        if method_id == 1:
+            variant = 1
+
+        elif method_id == 1.1:
+            variant = 2
+
+        else:
+            variant = 3
+
         return i, sorted(list(_MODEL.david_prioritize_2(graph.genes, graph.graph, variant)), key=lambda x: -x[1])
 
     # disease clustering with variants
@@ -100,7 +108,7 @@ parser.add_argument('--disease', '-d', type=str, required=True, help="Disease to
 parser.add_argument('--partition', '-p', type=str, required=True, help="Partition folder name (e.g. STRING)")
 parser.add_argument('--source', '-s', type=str, required=True, help="Drug or genetic data")
 parser.add_argument('--method', '-t', type=int_or_float, required=True,
-                    choices=[0, 1, 1.1, 2, 3, 4],
+                    choices=[0, 1, 1.1, 1.2, 2, 3, 4],
                     help="Ranking method: 0=baseline, 1.x=adaptive_k, 2=disease-gene clustering")
 
 parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of jobs to run in parallel")
@@ -133,6 +141,7 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
     method_mapping = {0: "STRING_baseline",
                       1: "adaptive_k_cc",
                       1.1: "adaptive_k_cc_degree",
+                      1.2: "adaptive_k_degree",
                       2: "disease_clustering_double_merge",
                       3: "disease_clustering"}
 
