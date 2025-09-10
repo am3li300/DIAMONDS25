@@ -4,7 +4,7 @@ python3 cross_validate.py \
   --model '../../adagio_model' \
   --disease 'allergy' \
   --partition 'STRING' \
-  --source 'drug' \
+  --source 'genetic' \
   --method 1.1 \
   --jobs 1 \
   --folds 3
