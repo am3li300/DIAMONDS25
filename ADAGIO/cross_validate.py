@@ -5,7 +5,7 @@ python3 cross_validate.py \
   --disease 'allergy' \
   --partition 'STRING' \
   --source 'drug' \
-  --method 1.2 \
+  --method 1.3 \
   --jobs 1 \
   --folds 3
 """
