@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 from contextlib import contextmanager
 from copy import deepcopy
-from math import floor
+from math import floor, log
 from collections import defaultdict
 import pandas as pd
 
@@ -16,6 +16,9 @@ from t_map.feta.randomwalk import RandomWalkWithRestart
 from t_map.garbanzo.transforms.tissue_reweight import reweight_graph_by_tissue
 from gfunc.command import glide_mat
 from networkx.algorithms import tree
+
+from scipy.sparse import csr_matrix
+import markov_clustering as mc
 
 # import sys
 # import os
@@ -126,7 +129,7 @@ class ADAGIO(PreComputeFeta):
     """
     adaptive k matrix
     """
-    def construct_k_mat(self, variant, graph, genes: List[Gene]) -> dict[str, int]:
+    def construct_k_mat(self, variant: int, graph, genes: List[Gene]) -> dict[str, int]:
         nodes = set(graph.nodes)
         avg_degree = graph.number_of_edges()*2//len(nodes)
         max_degree = max(graph.degree(gene) for gene in graph.nodes)
@@ -136,20 +139,50 @@ class ADAGIO(PreComputeFeta):
         subset = [node.name for node in genes if node.name in nodes]
         print("Number of queried genes in graph:", len(subset))
 
+        def get_clusters():
+            indices_to_nodes = list(graph.nodes())
+
+            matrix_array = nx.to_scipy_sparse_array(graph, nodelist=indices_to_nodes)
+            matrix = csr_matrix(matrix_array)
+
+            # expansion = 2, inflation = 2
+            res = mc.run_mcl(matrix)
+
+            clustering = mc.get_clusters(res)
+            clusters = []
+            for c in clustering:
+                    clusters.append({indices_to_nodes[indx] for indx in c})
+
+            return clusters
+
         # penalize high degrees only
         if variant == 3:
-            for name in subset:
-                max_edges_to_add[name] = floor(avg_degree * (1 - graph.degree(name) / max_degree))
+            clusters = get_clusters()
+            mapping = {}
+            max_degrees = []
+            for i in range(len(clusters)):
+                highest_degree = 0
+                for node in clusters[i]:
+                    mapping[node] = i
+                    highest_degree = max(highest_degree, graph.degree(node))
 
-            return max_edges_to_add
+                max_degrees.append(highest_degree)
         
         clustering_coefficients = nx.clustering(graph, nodes=subset)
         for name in subset:
             # penalize high clustering coefficients
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
             if variant == 2:
-                # also penalize high degrees
+                # also penalize high degrees with global degree max
                 max_edges_to_add[name] = floor(max_edges_to_add[name] * (1 - graph.degree(name) / max_degree))
+
+            elif variant == 3:
+                # also penalize high degrees with local cluster degree max
+                max_edges_to_add[name] = floor(max_edges_to_add[name] * (1 - graph.degree(name) / (max_degrees[mapping[name]]+1)))
+
+            elif variant == 4:
+                # also penalize high degrees with global degree max + log scaling
+                max_edges_to_add[name] = floor(max_edges_to_add[name] * (1 - log(graph.degree(name)) / log(max_degree)))
 
         return max_edges_to_add
 
