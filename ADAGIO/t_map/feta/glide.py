@@ -155,7 +155,7 @@ class ADAGIO(PreComputeFeta):
 
             return clusters
 
-        # penalize high degrees only
+        # divide based on highest degree within clusters
         if variant == 3:
             clusters = get_clusters()
             mapping = {}
