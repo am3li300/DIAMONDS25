@@ -176,6 +176,13 @@ class ADAGIO(PreComputeFeta):
 
             return max_edges_to_add
         
+        if variant == 6:
+            # single floor function cc degree log
+            for name in subset:
+                max_edges_to_add[name] = floor(avg_degree * (1-clustering_coefficients[name]) * (1 - log(graph.degree(name)) / log(max_degree)))
+
+            return max_edges_to_add
+
         for name in subset:
             # penalize high clustering coefficients
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
