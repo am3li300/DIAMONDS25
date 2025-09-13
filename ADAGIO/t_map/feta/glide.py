@@ -167,8 +167,15 @@ class ADAGIO(PreComputeFeta):
                     highest_degree = max(highest_degree, graph.degree(node))
 
                 max_degrees.append(highest_degree)
-        
+
         clustering_coefficients = nx.clustering(graph, nodes=subset)
+        if variant == 5:
+            # penalize low clustering coefficients
+            for name in subset:
+                max_edges_to_add[name] = floor(avg_degree * (clustering_coefficients[name]) * (1 - log(graph.degree(name)) / log(max_degree)))
+
+            return max_edges_to_add
+        
         for name in subset:
             # penalize high clustering coefficients
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
