@@ -186,6 +186,7 @@ class ADAGIO(PreComputeFeta):
         for name in subset:
             # penalize high clustering coefficients
             max_edges_to_add[name] = floor(avg_degree*(1-clustering_coefficients[name]))
+
             if variant == 2:
                 # also penalize high degrees with global degree max
                 max_edges_to_add[name] = floor(max_edges_to_add[name] * (1 - graph.degree(name) / max_degree))
@@ -197,6 +198,11 @@ class ADAGIO(PreComputeFeta):
             elif variant == 4:
                 # also penalize high degrees with global degree max + log scaling
                 max_edges_to_add[name] = floor(max_edges_to_add[name] * (1 - log(graph.degree(name)) / log(max_degree)))
+
+            elif variant == 7:
+                # lambda
+                max_edges_to_add[name] = min(avg_degree, floor(max_edges_to_add[name] * (1 - graph.degree(name) / max_degree) * (1 + 0.3 * pow(log(max_degree+1) / log(graph.degree(name)+1), 0.2))))
+
 
         return max_edges_to_add
 
