@@ -7,7 +7,8 @@ python3 cross_validate.py \
   --source 'drug' \
   --method 1.6 \
   --jobs 1 \
-  --folds 3
+  --folds 3 \
+  --k 0
 """
 
 from t_map.garbanzo.edgelist import EdgeListGarbanzo
@@ -29,6 +30,7 @@ from joblib import Parallel, delayed
 from collections import defaultdict
 import dill as pickle
 import re
+from pathlib import Path
 
 from disease_clustering import cluster_disease_genes
 from disease_clustering import merge_cluster_rankings
@@ -53,13 +55,13 @@ def _init_model(model_path):
         with open(model_path, "rb") as f:
             _MODEL = pickle.load(f)
 
-def _rank_from_paths(method_id, network_path, genelist_path, i):
+def _rank_from_paths(method_id, network_path, genelist_path, i, k=20):
     # Build the graph in the worker, not the parent
     graph = EdgeListGarbanzo(network_path, genelist_path)
 
     # baseline
     if method_id == 0:
-        return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph)), key=lambda x: -x[1])
+        return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph, k)), key=lambda x: -x[1])
 
     # adaptive k with variants
     elif method_id in [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]:
@@ -106,8 +108,9 @@ parser.add_argument('--method', '-t', type=int_or_float, required=True,
 
 parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of jobs to run in parallel")
 parser.add_argument('--folds', '-f', type=int, required=True, help="Cross validation folds (2-fold, 3-fold, etc.)")
+parser.add_argument('--k', '-k', type=int, required=False, help="Fixed k value")
 
-def main(network_path, model_path, disease, partition_name, source, choice, jobs, folds):
+def main(network_path, model_path, disease, partition_name, source, choice, jobs, folds, k=20):
     start_time = time()
 
     _init_model(model_path)
@@ -154,10 +157,16 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
         pre_dispatch="2*n_jobs",
 
     ) as parallel:
-        rankings = parallel(delayed(_rank_from_paths)(choice, npath, gpath, indx) for (npath, gpath, indx) in jobspecs)
+        rankings = parallel(delayed(_rank_from_paths)(choice, npath, gpath, indx, k) for (npath, gpath, indx) in jobspecs)
 
+    
     ranking_out_folder = "../cross_validation/{0}/rankings/{1}/{2}".format(source, method, disease)
     label_out_folder = "../cross_validation/{0}/labels/{1}/{2}".format(source, method, disease)
+
+    ranking_Path = Path(ranking_out_folder)
+    label_Path = Path(label_out_folder)
+    ranking_Path.mkdir(parents=True, exist_ok=True)
+    label_Path.mkdir(parents=True, exist_ok=True)
 
     for indx, ranking in rankings:
         # save each ranking to cross_validation/rankings

@@ -357,6 +357,7 @@ class ADAGIO(PreComputeFeta):
 
     def prioritize(self, disease_genes: List[Gene],
                    graph: Union[nx.Graph, None],
+                   k_value: int = 0,
                    tissue_file: Optional[str] = None,
                    variant: str = "none",
                    **kwargs) -> Set[Tuple[Gene, float]]:
@@ -373,7 +374,7 @@ class ADAGIO(PreComputeFeta):
         # print("The graph originally has " + str(len(graph.edges)) + " edges")
         
         if hasattr(self, "k_mat"): # originally to_add
-            k = self.k_mat.default_factory()
+            k = self.k_mat.default_factory() if not k_value else k_value
             # print("adding {0} edges to each disease gene".format(k))
             for disease_gene in disease_genes:
                 to_add_pairs = self.add_edges_around_node(
