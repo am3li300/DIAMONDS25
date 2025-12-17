@@ -110,7 +110,7 @@ parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of job
 parser.add_argument('--folds', '-f', type=int, required=True, help="Cross validation folds (2-fold, 3-fold, etc.)")
 parser.add_argument('--k', '-k', type=int, required=False, help="Fixed k value")
 
-def main(network_path, model_path, disease, partition_name, source, choice, jobs, folds, k=20):
+def main(network_path, model_path, disease, partition_name, source, choice, jobs, folds, k=-1):
     start_time = time()
 
     _init_model(model_path)
@@ -134,7 +134,7 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
     )
     n = len(gene_files)
 
-    method_mapping = {0: "STRING_baseline",
+    method_mapping = {0: "fixed_k",
                       1: "adaptive_k_cc",
                       1.1: "adaptive_k_cc_degree",
                       1.2: "adaptive_k_cc_markov",
@@ -160,8 +160,15 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
         rankings = parallel(delayed(_rank_from_paths)(choice, npath, gpath, indx, k) for (npath, gpath, indx) in jobspecs)
 
     
-    ranking_out_folder = "../cross_validation/{0}/rankings/{1}/{2}".format(source, method, disease)
-    label_out_folder = "../cross_validation/{0}/labels/{1}/{2}".format(source, method, disease)
+    if k == -1:
+        ranking_out_folder = "../cross_validation/{0}/rankings/{1}/{2}".format(source, method, disease)
+    else:
+        ranking_out_folder = "../cross_validation/{0}/rankings/{1}_{2}/{3}".format(source, method, k, disease)
+
+    if k == -1:
+        label_out_folder = "../cross_validation/{0}/labels/{1}/{2}".format(source, method, disease)
+    else:
+        label_out_folder = "../cross_validation/{0}/labels/{1}_{2}/{3}".format(source, method, k, disease)
 
     ranking_Path = Path(ranking_out_folder)
     label_Path = Path(label_out_folder)
