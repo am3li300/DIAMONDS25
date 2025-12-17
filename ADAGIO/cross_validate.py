@@ -5,7 +5,7 @@ python3 cross_validate.py \
   --disease 'allergy' \
   --partition 'STRING' \
   --source 'drug' \
-  --method 1.6 \
+  --method 0 \
   --jobs 1 \
   --folds 3 \
   --k 0
@@ -59,7 +59,7 @@ def _rank_from_paths(method_id, network_path, genelist_path, i, k=20):
     # Build the graph in the worker, not the parent
     graph = EdgeListGarbanzo(network_path, genelist_path)
 
-    # baseline
+    # fixed k
     if method_id == 0:
         return i, sorted(list(_MODEL.prioritize(graph.genes, graph.graph, k)), key=lambda x: -x[1])
 
@@ -108,7 +108,7 @@ parser.add_argument('--method', '-t', type=int_or_float, required=True,
 
 parser.add_argument('--jobs', '-j', type=int, required=True, help="Number of jobs to run in parallel")
 parser.add_argument('--folds', '-f', type=int, required=True, help="Cross validation folds (2-fold, 3-fold, etc.)")
-parser.add_argument('--k', '-k', type=int, required=False, help="Fixed k value")
+parser.add_argument('--k', '-k', type=int, default=-1, required=False, help="Fixed k value")
 
 def main(network_path, model_path, disease, partition_name, source, choice, jobs, folds, k=-1):
     start_time = time()
@@ -212,4 +212,4 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    main(args.network, args.model, args.disease, args.partition, args.source, args.method, args.jobs, args.folds)
+    main(args.network, args.model, args.disease, args.partition, args.source, args.method, args.jobs, args.folds, args.k)

@@ -2,6 +2,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+_trap = getattr(np, "trapezoid", np.trapz)
+
 PRC_RANDOM_Y = float("inf")
 DISEASE = ""
 
@@ -23,7 +25,7 @@ def plot_auroc(avgFPR, avgRecall, save_dir=None):
         plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapezoid(avgRecall, avgFPR)
+    auc_score = _trap(avgRecall, avgFPR)
     print(f"AUROC score: {auc_score:.4f}")
 
 def plot_auprc(avgRecall, avgPrecision, save_dir=None):
@@ -44,7 +46,7 @@ def plot_auprc(avgRecall, avgPrecision, save_dir=None):
         plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapezoid(avgPrecision, avgRecall)
+    auc_score = _trap(avgPrecision, avgRecall)
     print(f"AUPRC score: {auc_score:.4f}")
 
 def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
@@ -81,12 +83,12 @@ def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
     tpr_seg = np.concatenate(([0.0], tpr_seg))
 
     # rescale
-    partial_auc = np.trapezoid(tpr_seg, fpr_seg)
+    partial_auc = _trap(tpr_seg, fpr_seg)
     return partial_auc / fpr_max
 
 ################################ actually use ##################################
 
-def positives(label_directory, numPos, numGenes, disease, source, method):
+def positives(label_directory, numPos, numGenes, disease, source, method, k_value=None):
     global PRC_RANDOM_Y
     global DISEASE
     """
@@ -155,7 +157,11 @@ def positives(label_directory, numPos, numGenes, disease, source, method):
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
 
-    graph_dir = "../cross_validation/{0}/graphs/{1}".format(source, method)
+    if k_value is None:
+        graph_dir = "../cross_validation/{0}/graphs/{1}".format(source, method)
+    else:
+        graph_dir = "../cross_validation/{0}/graphs/{1}_{2}".format(source, method, k_value)
+
     plot_auroc(avgFPR, avgRecall, graph_dir)
     plot_auprc(avgRecall, avgPrecision, graph_dir)
 
