@@ -204,7 +204,7 @@ def main(network_path, model_path, disease, partition_name, source, choice, jobs
 
     # calculate validation metrics and produce graphs
     numPos = count_lines(f"{partition_folder}/{folds}_{disease}_non_seeds_0.txt")
-    positives(label_out_folder, numPos, _STRING_NUM_GENES, disease, source, method)
+    positives(label_out_folder, numPos, _STRING_NUM_GENES, disease, source, method, k)
 
     end_time = time()
     print("Total time:", end_time-start_time)

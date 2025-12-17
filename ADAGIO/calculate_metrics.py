@@ -88,7 +88,7 @@ def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
 
 ################################ actually use ##################################
 
-def positives(label_directory, numPos, numGenes, disease, source, method, k_value=None):
+def positives(label_directory, numPos, numGenes, disease, source, method, k_value=-1):
     global PRC_RANDOM_Y
     global DISEASE
     """
@@ -157,7 +157,7 @@ def positives(label_directory, numPos, numGenes, disease, source, method, k_valu
         avgFPR[i] = FPR[i]/numFiles
         avgPrecision[i] = precision[i]/numFiles
 
-    if k_value is None:
+    if k_value == -1:
         graph_dir = "../cross_validation/{0}/graphs/{1}".format(source, method)
     else:
         graph_dir = "../cross_validation/{0}/graphs/{1}_{2}".format(source, method, k_value)
