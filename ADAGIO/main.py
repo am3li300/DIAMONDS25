@@ -444,12 +444,17 @@ def supervised_clustering(network_path, genelist_path):
 
         return dale_merge(og_ranking, supervised_ranking) # merge_og_supervised(og_ranking, supervised_ranking)
         
-
+"""
+python3 main.py \
+--network "../data/networks/STRING_protein_links_parsed.tsv" \
+--genelist "../data/seed_nodes/single_protein/CYP27C1.txt" \
+--out "../output/single_protein/CYP27C1/baseline_ranking.txt"
+"""
 def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
         start = time()
 
         # comment out for disease gene clustering
-        model_file = open("/Users/dkyee/Desktop/adagio_model", "rb")
+        model_file = open("/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/adagio_model", "rb")
         model = pickle.load(model_file)
         graph = EdgeListGarbanzo(network_path, genelist_path)
 
