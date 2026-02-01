@@ -33,6 +33,7 @@ import dill as pickle
 parser = argparse.ArgumentParser()
 parser.add_argument('--network', '-n', type=str, required=True, help="Path to edgelist, assumes tab separated.")
 parser.add_argument('--genelist', '-g', type=str, required=True, help="Path to genelist, assumes genes are newline separated and in the network.")
+parser.add_argument('--model', '-m', type=str, required=True, help="Path to pickled model file")
 parser.add_argument('--out', '-o', type=str, default="adagio.out",help="Path to output results")
 
 
@@ -448,13 +449,14 @@ def supervised_clustering(network_path, genelist_path):
 python3 main.py \
 --network "../data/networks/STRING_protein_links_parsed.tsv" \
 --genelist "../data/seed_nodes/single_protein/CYP27C1.txt" \
+--model '../../adagio_model'
 --out "../output/single_protein/CYP27C1/baseline_ranking.txt"
 """
-def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
+def main(network_path: str, genelist_path: str, model_path: str, out_path: str="adagio.out"):
         start = time()
 
         # comment out for disease gene clustering
-        model_file = open("/Users/dkyee/Desktop/CSCI/DIAMONDS Tufts/adagio_model", "rb")
+        model_file = open(model_path, "rb")
         model = pickle.load(model_file)
         graph = EdgeListGarbanzo(network_path, genelist_path)
 
@@ -495,7 +497,7 @@ def main(network_path: str, genelist_path: str, out_path: str="adagio.out"):
 
 if __name__ == "__main__":
         args = parser.parse_args()
-        main(args.network, args.genelist, args.out)
+        main(args.network, args.genelist, args.model, args.out)
         
 
 
