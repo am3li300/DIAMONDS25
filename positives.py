@@ -41,7 +41,7 @@ def compute_truncated_auroc(fpr, tpr, fpr_max=0.10):
     tpr_seg = np.concatenate(([0.0], tpr_seg))
 
     # rescale
-    partial_auc = np.trapezoid(tpr_seg, fpr_seg)
+    partial_auc = np.trapz(tpr_seg, fpr_seg)
     return partial_auc / fpr_max
 
 """
@@ -80,7 +80,7 @@ def plot_auroc(avgFPR, avgRecall):
     plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapezoid(avgRecall, avgFPR)
+    auc_score = np.trapz(avgRecall, avgFPR)
     print(f"AUROC score: {auc_score:.4f}")
 
 def plot_auprc(avgRecall, avgPrecision):
@@ -95,7 +95,7 @@ def plot_auprc(avgRecall, avgPrecision):
     plt.show()
 
     # Trapezoidal Rule to get area under curve
-    auc_score = np.trapezoid(avgPrecision, avgRecall)
+    auc_score = np.trapz(avgPrecision, avgRecall)
     print(f"AUPRC score: {auc_score:.4f}")
 
 
