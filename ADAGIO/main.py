@@ -16,7 +16,9 @@ import igraph as ig
 
 import sys
 import os
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from partition import *
 
 import pcst_fast
@@ -448,9 +450,9 @@ def supervised_clustering(network_path, genelist_path):
 """
 python3 main.py \
 --network "../data/networks/STRING_protein_links_parsed.tsv" \
---genelist "../data/seed_nodes/single_protein/CYP27C1.txt" \
---model '../../adagio_model'
---out "../output/single_protein/CYP27C1/baseline_ranking.txt"
+--genelist "../data/seed_nodes/single_protein/FBXW5.txt" \
+--model '../../adagio_model' \
+--out "../output/single_protein/FBXW5/baseline_ranking.txt"
 """
 def main(network_path: str, genelist_path: str, model_path: str, out_path: str="adagio.out"):
         start = time()
@@ -486,14 +488,14 @@ def main(network_path: str, genelist_path: str, model_path: str, out_path: str="
         """
         # predictions = supervised_clustering(network_path, genelist_path)
 
-
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
         with open(out_path, "w") as f:
                 for gene, score in predictions:
                         f.write(f"{gene.name}\t{score}\n")
 
         end = time()
         print("Total time:", end-start)
-        
+
 
 if __name__ == "__main__":
         args = parser.parse_args()
