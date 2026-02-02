@@ -450,9 +450,9 @@ def supervised_clustering(network_path, genelist_path):
 """
 python3 main.py \
 --network "../data/networks/STRING_protein_links_parsed.tsv" \
---genelist "../data/seed_nodes/single_protein/FBXW5.txt" \
+--genelist "../data/seed_nodes/single_protein/CTRC.txt" \
 --model '../../adagio_model' \
---out "../output/single_protein/FBXW5/baseline_ranking.txt"
+--out "../output/single_protein/CTRC/baseline_ranking.txt"
 """
 def main(network_path: str, genelist_path: str, model_path: str, out_path: str="adagio.out"):
         start = time()
