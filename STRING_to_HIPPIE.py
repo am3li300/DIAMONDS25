@@ -179,7 +179,7 @@ def main():
     # ../9606.protein.aliases.v12.0.txt.gz
     string_alias_file = input("Enter STRING alias file path/name: ").strip()
 
-    # data/seed_nodes/drug/parkinsons_disease_drug.txt
+    # data/seed_nodes/genetic/parkinsons_disease.txt
     seed_file = input("Enter STRING seed file path/name: ").strip()
 
     # ../Homo_sapiens.gene_info
