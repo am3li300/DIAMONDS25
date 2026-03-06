@@ -1,0 +1,34 @@
+string_protein_id	matched_alias	match_type	hippie_gene_id	hippie_entrez_label	hippie_symbol	present_in_hippie
+9606.ENSP00000023897		unmapped				False
+9606.ENSP00000206249		unmapped				False
+9606.ENSP00000221444	3743	geneid_alias	3743	entrez gene:3743	KCNA7	False
+9606.ENSP00000264357		unmapped				False
+9606.ENSP00000264426		unmapped				False
+9606.ENSP00000265294		unmapped				False
+9606.ENSP00000265572		unmapped				False
+9606.ENSP00000283256		unmapped				False
+9606.ENSP00000285900		unmapped				False
+9606.ENSP00000297404		unmapped				False
+9606.ENSP00000299267		unmapped				False
+9606.ENSP00000305824		unmapped				False
+9606.ENSP00000307694		unmapped				False
+9606.ENSP00000308549		unmapped				False
+9606.ENSP00000314520		unmapped				False
+9606.ENSP00000319984		unmapped				False
+9606.ENSP00000327652		unmapped				False
+9606.ENSP00000331912		unmapped				False
+9606.ENSP00000335592		unmapped				False
+9606.ENSP00000336630		unmapped				False
+9606.ENSP00000341390		unmapped				False
+9606.ENSP00000348897		unmapped				False
+9606.ENSP00000350616		unmapped				False
+9606.ENSP00000358511		unmapped				False
+9606.ENSP00000359334		unmapped				False
+9606.ENSP00000360406		unmapped				False
+9606.ENSP00000363812		unmapped				False
+9606.ENSP00000367959		unmapped				False
+9606.ENSP00000382659		unmapped				False
+9606.ENSP00000447173		unmapped				False
+9606.ENSP00000448689		unmapped				False
+9606.ENSP00000463533	81033	geneid_alias	81033	entrez gene:81033	KCNH6	False
+9606.ENSP00000386796		unmapped				False
